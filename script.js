@@ -234,3 +234,10 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 // Outros eventos permanecem iguais...
+
+
+
+
+
+
+
