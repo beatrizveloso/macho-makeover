@@ -2,7 +2,7 @@
   padding: 0%;
   margin: 0%;
   box-sizing: border-box;
-  background: url(/images/fundo-degrade\ \(1\).png);
+  background: url(/images/home.png);
 }
 
 .container {
@@ -17,7 +17,14 @@
     margin-top: 700px;
 }
 
-.container text{
+button {
+    width: 200px;
+    height: 80px;
+    border-radius: 80px;
+    background: url(/images/fundo-rosa-glitter.jpg);
+}
+
+.texto text{
     position: absolute;
-    margin-top: 700px;
+    margin-top: 900px;
 }
