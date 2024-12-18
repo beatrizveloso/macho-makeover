@@ -40,45 +40,9 @@
             padding-left: 60px;
         }
 
-        .botao h1 {
-            font-size: 20px;
-            background: none;
-            padding-top: 15px;
-            padding-left: 60px;
-        }
-
-        .botao img {
-            width: 50px;
-            padding-top: 15px;
-            padding-left: 15px;
-            background: none;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: url(images/cortina.png);
-            font-family: Arial, sans-serif;
-            background-size: cover;
-            /* A imagem vai cobrir toda a tela */
-            background-position: center;
-            /* A imagem vai ser centralizada */
-            background-repeat: no-repeat;
-            /* A imagem não vai se repetir */
-            margin: 0;
-            /* Remover margens da tela */
-            height: 100vh;
-            /* Garantir que o body ocupe toda a altura da tela */
-        }
-
         .carousel {
             position: relative;
             width: 80%;
-            /* Aumentado para 80% */
             height: 300px;
             perspective: 1200px;
             margin-top: 20px;
@@ -101,52 +65,13 @@
             height: 90%;
             transform-origin: center;
             transition: transform 0.5s;
+            cursor: pointer;
         }
 
         .carousel-item img {
             width: auto;
             height: 100%;
             object-fit: contain;
-        }
-
-        .carousel-item:nth-child(1) {
-            transform: rotateY(0deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(2) {
-            transform: rotateY(36deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(3) {
-            transform: rotateY(72deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(4) {
-            transform: rotateY(108deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(5) {
-            transform: rotateY(144deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(6) {
-            transform: rotateY(180deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(7) {
-            transform: rotateY(216deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(8) {
-            transform: rotateY(252deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(9) {
-            transform: rotateY(288deg) translateZ(350px);
-        }
-
-        .carousel-item:nth-child(10) {
-            transform: rotateY(324deg) translateZ(350px);
         }
 
         .carousel-controls {
@@ -173,28 +98,31 @@
         .carousel-button:hover {
             background: rgba(0, 0, 0, 0.8);
         }
+
+        body {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: url(images/cortina.png);
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 
 <body>
     <div class="text">
         <h1><img src="http://www.gigaglitters.com/created/F5LYma4SVL.gif" width="460" height="90" border="0" alt="">
-            <img src="http://www.gigaglitters.com/created/hmXs2jRS7q.gif" width="270" height="90" border="0" alt="">
-        </h1>
+            <img src="http://www.gigaglitters.com/created/hmXs2jRS7q.gif" width="270" height="90" border="0" alt=""></h1>
     </div>
 
     <div class="carousel">
         <div class="carousel-track">
-            <div class="carousel-item"><img src="images/aquaman_base.png" alt="Foto 1"></div>
-            <div class="carousel-item"><img src="images/the_rock_base.png" alt="Foto 2"></div>
-            <div class="carousel-item"><img src="images/thor_base.png" alt="Foto 3"></div>
-            <div class="carousel-item"><img src="images/aquaman_base.png" alt="Foto 4"></div>
-            <div class="carousel-item"><img src="images/the_rock_base.png" alt="Foto 5"></div>
-            <div class="carousel-item"><img src="images/thor_base.png" alt="Foto 6"></div>
-            <div class="carousel-item"><img src="images/aquaman_base.png" alt="Foto 7"></div>
-            <div class="carousel-item"><img src="images/the_rock_base.png" alt="Foto 8"></div>
-            <div class="carousel-item"><img src="images/thor_base.png" alt="Foto 9"></div>
-            <div class="carousel-item"><img src="images/aquaman_base.png" alt="Foto 10"></div>
+            <div class="carousel-item" onclick="selectCharacter('aquaman')"><img src="images/aquaman_base.png" alt="Aquaman"></div>
+            <div class="carousel-item" onclick="selectCharacter('therock')"><img src="images/the_rock_base.png" alt="The Rock"></div>
+            <div class="carousel-item" onclick="selectCharacter('thor')"><img src="images/thor_base.png" alt="Thor"></div>
         </div>
         <div class="carousel-controls">
             <button class="carousel-button" id="prev">&#8249;</button>
@@ -202,9 +130,12 @@
         </div>
     </div>
 
+    <div class="botao">
+        <a href="game.html"><button><h1>Selecionar</h1><img src="images/diamante.png" alt=""></button></a>
+    </div>
+
     <script>
         const track = document.querySelector('.carousel-track');
-        const items = document.querySelectorAll('.carousel-item');
         const nextButton = document.getElementById('next');
         const prevButton = document.getElementById('prev');
         let angle = 0;
@@ -218,13 +149,12 @@
             angle += 36;
             track.style.transform = `rotateY(${angle}deg)`;
         });
-    </script>
 
-    <div class="botao">
-        <a href="game.html"><button>
-                <h1>Selecionar</h1><img src="images/diamante.png" alt="">
-            </button></a>
-    </div>
+        function selectCharacter(character) {
+            // Armazenar o personagem selecionado no localStorage
+            localStorage.setItem('selectedCharacter', character);
+        }
+    </script>
 </body>
 
 </html>
