@@ -34,6 +34,8 @@
 
     #avatarCanvas {
       border: 2px dashed pink;
+      max-width: 100%;
+      max-height: 100%;
     }
 
     .canva {
@@ -169,6 +171,32 @@
       position: absolute;
       left: 20px;
     }
+
+    .tabs-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      margin: 0 5px;
+      background-color: #ddd;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tab.active {
+      background-color: #d64499;
+      color: white;
+    }
   </style>
 </head>
 
@@ -176,7 +204,7 @@
 
   <div class="alinhei">
     <div class="canva">
-      <canvas id="avatarCanvas" width="500" height="640"></canvas>
+      <canvas id="avatarCanvas" width="500" height="600"></canvas>
     </div>
 
     <div class="save">
@@ -188,6 +216,13 @@
   </div>
 
   <div class="carousel-container">
+    <div class="tabs-container">
+      <div class="tabs">
+        <div class="tab active" data-category="oculos">Óculos</div>
+        <div class="tab" data-category="bolsas">Bolsas</div>
+        <div class="tab" data-category="lacos">Laços</div>
+      </div>
+    </div>
     <div class="arrow" id="prevArrow">↑</div>
     <div class="carousel" id="carousel">
       <!-- Itens do carrossel serão adicionados dinamicamente -->
@@ -196,234 +231,273 @@
   </div>
 
   <script>
-    const canvas = document.getElementById('avatarCanvas');
-    const ctx = canvas.getContext('2d');
-    const objects = [];
-    let currentObject = null;
-    let isDragging = false;
-    let isResizing = false;
-    let resizeCorner = null;
 
-    const aquamanImage = new Image();
-    aquamanImage.src = 'images/aquaman_base.png';
-    aquamanImage.onload = () => {
-      objects.push({
-        image: aquamanImage,
-        x: 0,
-        y: 0,
-        width: canvas.width,
-        height: canvas.height,
-        selected: false,
-        draggable: false,
-        resizable: false
-      });
-      drawCanvas();
-    };
+// Seleciona o botão e o canvas
+const saveButton = document.getElementById("saveAvatar");
 
-    function drawCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      objects.forEach(obj => {
-        ctx.drawImage(obj.image, obj.x, obj.y, obj.width, obj.height);
-        if (obj.selected) {
-          drawResizeHandles(obj);
-        }
-      });
-    }
+// Adiciona o evento de clique ao botão
+saveButton.addEventListener("click", () => {
+  // Converte o conteúdo do canvas em uma URL de imagem PNG
+  const image = canvas.toDataURL("image/png");
 
-    function drawResizeHandles(obj) {
-      const handles = [
-        { x: obj.x, y: obj.y },
-        { x: obj.x + obj.width, y: obj.y },
-        { x: obj.x, y: obj.y + obj.height },
-        { x: obj.x + obj.width, y: obj.y + obj.height }
+  // Cria um elemento de link temporário para download
+  const link = document.createElement("a");
+  link.href = image;
+  link.download = "macho.png"; // Nome do arquivo salvo
+  link.click(); // Dispara o clique no link
+});
+
+// Elementos do Canvas
+const canvas = document.getElementById("avatarCanvas");
+const ctx = canvas.getContext("2d");
+const aquamanImage = new Image();
+aquamanImage.src = "images/aquaman_base.png";
+
+// Array para armazenar acessórios adicionados
+const accessoryImages = [];
+let selectedAccessory = null; // Acessório atualmente selecionado para ajuste
+let resizing = null; // Indica se está redimensionando (qual canto)
+let isDragging = false; // Verifica se o mouse está pressionado
+
+// Função para desenhar Aquaman e acessórios no canvas
+function drawAquaman() {
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+
+  const scaleX = canvasWidth / aquamanImage.width;
+  const scaleY = canvasHeight / aquamanImage.height;
+  const scale = Math.min(scaleX, scaleY);
+
+  const newWidth = aquamanImage.width * scale;
+  const newHeight = aquamanImage.height * scale;
+
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.drawImage(
+    aquamanImage,
+    (canvasWidth - newWidth) / 2,
+    (canvasHeight - newHeight) / 2,
+    newWidth,
+    newHeight
+  );
+
+  // Desenha os acessórios adicionados
+  accessoryImages.forEach(({ img, x, y, width, height }) => {
+    ctx.drawImage(img, x, y, width, height);
+
+    // Desenha marcadores somente no acessório selecionado
+    if (selectedAccessory && selectedAccessory.img === img) {
+      ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+      const corners = [
+        { x: x - 5, y: y - 5 }, // Superior esquerdo
+        { x: x + width - 5, y: y - 5 }, // Superior direito
+        { x: x - 5, y: y + height - 5 }, // Inferior esquerdo
+        { x: x + width - 5, y: y + height - 5 }, // Inferior direito
       ];
-      ctx.fillStyle = 'blue';
-      handles.forEach(handle => {
-        ctx.fillRect(handle.x - 5, handle.y - 5, 10, 10);
-      });
+      corners.forEach(({ x, y }) => ctx.fillRect(x, y, 10, 10));
+    }
+  });
+}
+
+// Função para adicionar um acessório ao canvas
+function addAccessory(imageSrc) {
+  const accessoryImage = new Image();
+  accessoryImage.src = imageSrc;
+
+  accessoryImage.onload = () => {
+    const width = 100; // Tamanho inicial
+    const height = 100; // Tamanho inicial
+    const x = (canvas.width - width) / 2; // Centro inicial
+    const y = (canvas.height - height) / 2;
+
+    accessoryImages.push({ img: accessoryImage, x, y, width, height });
+    drawAquaman();
+  };
+}
+
+// Detecta qual canto está sendo clicado
+function detectCorner(x, y, acc) {
+  const cornerSize = 10;
+  const corners = [
+    { name: "top-left", x: acc.x, y: acc.y },
+    { name: "top-right", x: acc.x + acc.width, y: acc.y },
+    { name: "bottom-left", x: acc.x, y: acc.y + acc.height },
+    { name: "bottom-right", x: acc.x + acc.width, y: acc.y + acc.height },
+  ];
+  return corners.find(
+    (corner) =>
+      x >= corner.x - cornerSize &&
+      x <= corner.x + cornerSize &&
+      y >= corner.y - cornerSize &&
+      y <= corner.y + cornerSize
+  );
+}
+
+// Eventos de interação no canvas para mover e redimensionar acessórios
+canvas.addEventListener("mousedown", (event) => {
+  const { offsetX, offsetY } = event;
+
+  // Verifica se está clicando em um canto
+  selectedAccessory = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
+  if (selectedAccessory) {
+    resizing = detectCorner(offsetX, offsetY, selectedAccessory).name;
+    isDragging = true;
+    return;
+  }
+
+  // Seleciona o item para mover
+  selectedAccessory = accessoryImages.find(
+    ({ x, y, width, height }) =>
+      offsetX >= x && offsetX <= x + width && offsetY >= y && offsetY <= y + height
+  );
+
+  if (selectedAccessory) {
+    isDragging = true;
+  }
+
+  drawAquaman(); // Atualiza o desenho ao selecionar
+});
+
+canvas.addEventListener("mousemove", (event) => {
+  if (isDragging && selectedAccessory) {
+    const { offsetX, offsetY } = event;
+
+    if (resizing) {
+      // Redimensiona o acessório baseado no canto
+      if (resizing === "top-left") {
+        selectedAccessory.width += selectedAccessory.x - offsetX;
+        selectedAccessory.height += selectedAccessory.y - offsetY;
+        selectedAccessory.x = offsetX;
+        selectedAccessory.y = offsetY;
+      } else if (resizing === "top-right") {
+        selectedAccessory.width = offsetX - selectedAccessory.x;
+        selectedAccessory.height += selectedAccessory.y - offsetY;
+        selectedAccessory.y = offsetY;
+      } else if (resizing === "bottom-left") {
+        selectedAccessory.width += selectedAccessory.x - offsetX;
+        selectedAccessory.height = offsetY - selectedAccessory.y;
+        selectedAccessory.x = offsetX;
+      } else if (resizing === "bottom-right") {
+        selectedAccessory.width = offsetX - selectedAccessory.x;
+        selectedAccessory.height = offsetY - selectedAccessory.y;
+      }
+    } else {
+      // Move o acessório
+      selectedAccessory.x = offsetX - selectedAccessory.width / 2;
+      selectedAccessory.y = offsetY - selectedAccessory.height / 2;
     }
 
-    function getObjectAtPosition(x, y) {
-      for (let i = objects.length - 1; i >= 0; i--) {
-        const obj = objects[i];
-        const corners = [
-          { x: obj.x, y: obj.y, corner: 'tl' },
-          { x: obj.x + obj.width, y: obj.y, corner: 'tr' },
-          { x: obj.x, y: obj.y + obj.height, corner: 'bl' },
-          { x: obj.x + obj.width, y: obj.y + obj.height, corner: 'br' }
-        ];
+    drawAquaman();
+  }
+});
 
-        for (const corner of corners) {
-          if (
-            x >= corner.x - 5 &&
-            x <= corner.x + 5 &&
-            y >= corner.y - 5 &&
-            y <= corner.y + 5
-          ) {
-            return { object: obj, resizeCorner: corner.corner };
-          }
-        }
+canvas.addEventListener("mouseup", () => {
+  isDragging = false;
+  resizing = null;
+});
 
-        if (
-          x > obj.x &&
-          x < obj.x + obj.width &&
-          y > obj.y &&
-          y < obj.y + obj.height
-        ) {
-          return { object: obj, resizeCorner: null };
-        }
-      }
-      return null;
+// Remove seleção ao clicar fora do canvas
+document.addEventListener("click", (event) => {
+  if (!canvas.contains(event.target)) {
+    selectedAccessory = null;
+    resizing = null;
+    isDragging = false;
+    drawAquaman();
+  }
+});
+
+// Evento para deletar o item selecionado
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Delete" && selectedAccessory) {
+    const index = accessoryImages.indexOf(selectedAccessory);
+    if (index !== -1) {
+      accessoryImages.splice(index, 1);
     }
+    selectedAccessory = null;
+    drawAquaman();
+  }
+});
 
-    canvas.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const src = e.dataTransfer.getData('accessory');
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        objects.push({
-          image: img,
-          x: e.offsetX - img.width / 2,
-          y: e.offsetY - img.height / 2,
-          width: img.width,
-          height: img.height,
-          selected: false,
-          draggable: true,
-          resizable: true
-        });
-        drawCanvas();
-      };
+// Inicializa o desenho do Aquaman no canvas
+aquamanImage.onload = drawAquaman;
+
+
+
+
+
+
+
+
+// Gerenciamento de categorias e itens do carrossel
+const tabs = document.querySelectorAll(".tab");
+const carousel = document.getElementById("carousel");
+
+const items = {
+  oculos: [
+    "images/oculos-rose-glitter.png",
+    "images/oculos-brown.png",
+    "images/juliete.png",
+    "images/oculos-blue-pink.png",
+    "images/cachecol-rosa.png",
+  ],
+  bolsas: [
+    "images/bag-pink.png",
+    "images/mini-bag-pink.png",
+    "images/vestido-cereja.png",
+    "images/short-bege.png",
+    "images/cachecol-rosa.png",
+  ],
+  lacos: [
+    "images/laço-rosa.png",
+    "images/cachecol-rosa.png",
+    "images/oculos-blue-pink.png",
+    "images/oculos-rose-glitter.png",
+    "images/short-bege.png",
+  ],
+};
+
+let currentIndex = 0;
+
+function renderItems(category) {
+  const categoryItems = items[category];
+  carousel.innerHTML = ""; // Limpa itens anteriores
+
+  categoryItems.forEach((imageSrc) => {
+    const item = document.createElement("div");
+    item.classList.add("carousel-item");
+
+    const img = document.createElement("img");
+    img.src = imageSrc;
+    img.alt = "Acessório";
+    item.appendChild(img);
+
+    item.addEventListener("click", () => {
+      addAccessory(imageSrc); // Adiciona o acessório ao canvas
     });
 
-    canvas.addEventListener('dragover', (e) => e.preventDefault());
+    carousel.appendChild(item);
+  });
+}
 
-    canvas.addEventListener('mousedown', (e) => {
-      const { offsetX: x, offsetY: y } = e;
-      const result = getObjectAtPosition(x, y);
+function updateTabs() {
+  tabs.forEach((tab, index) => {
+    tab.classList.toggle("active", index === currentIndex);
+  });
 
-      if (result) {
-        currentObject = result.object;
-        currentObject.selected = true;
-        isResizing = !!result.resizeCorner;
-        resizeCorner = result.resizeCorner;
-        isDragging = !isResizing;
+  const category = tabs[currentIndex].dataset.category;
+  renderItems(category);
+}
 
-        objects.splice(objects.indexOf(currentObject), 1);
-        objects.push(currentObject);
-        drawCanvas();
-      } else {
-        currentObject = null;
-        objects.forEach(obj => (obj.selected = false));
-        drawCanvas();
-      }
-    });
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => {
+    currentIndex = index;
+    updateTabs();
+  });
+});
 
-    canvas.addEventListener('mousemove', (e) => {
-      if (!currentObject) return;
-      const { offsetX: x, offsetY: y } = e;
+// Inicializa a primeira categoria no carrossel
+updateTabs();
 
-      if (isDragging) {
-        currentObject.x = x - currentObject.width / 2;
-        currentObject.y = y - currentObject.height / 2;
-        drawCanvas();
-      } else if (isResizing) {
-        switch (resizeCorner) {
-          case 'tl':
-            currentObject.width += currentObject.x - x;
-            currentObject.height += currentObject.y - y;
-            currentObject.x = x;
-            currentObject.y = y;
-            break;
-          case 'tr':
-            currentObject.width = x - currentObject.x;
-            currentObject.height += currentObject.y - y;
-            currentObject.y = y;
-            break;
-          case 'bl':
-            currentObject.width += currentObject.x - x;
-            currentObject.height = y - currentObject.y;
-            currentObject.x = x;
-            break;
-          case 'br':
-            currentObject.width = x - currentObject.x;
-            currentObject.height = y - currentObject.y;
-            break;
-        }
-        drawCanvas();
-      }
-    });
 
-    canvas.addEventListener('mouseup', () => {
-      isDragging = false;
-      isResizing = false;
-      resizeCorner = null;
-    });
-
-    document.getElementById('saveAvatar').addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'macho.png';
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-
-    const carousel = document.getElementById('carousel');
-    const prevArrow = document.getElementById('prevArrow');
-    const nextArrow = document.getElementById('nextArrow');
-
-    const accessories = [
-      "images/oculos-rose-glitter.png",
-      "images/oculos-brown.png",
-      "images/juliete.png",
-      "images/oculos-blue-pink.png",
-      "images/cachecol-rosa.png",
-      "images/bag-pink.png",
-      "images/mini-bag-pink.png",
-      "images/vestido-cereja.png",
-      "images/short-bege.png",
-      "images/laço-rosa.png",
-      "images/oculos-rose-glitter.png",
-      "images/cachecol-rosa.png",
-      "images/oculos-blue-pink.png",
-      "images/bag-pink.png"
-    ];
-
-    function renderItems() {
-      carousel.innerHTML = "";
-      accessories.forEach((src) => {
-        const item = document.createElement("div");
-        item.classList.add("carousel-item");
-
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = "Acessório";
-        item.appendChild(img);
-
-        item.addEventListener("click", () => {
-          alert(`Acessório selecionado: ${src}`);
-        });
-
-        carousel.appendChild(item);
-      });
-    }
-
-    let scrollPosition = 0;
-    const scrollStep = 300;
-
-    prevArrow.addEventListener("click", () => {
-      scrollPosition = Math.max(scrollPosition - scrollStep, 0);
-      carousel.scrollTo({ top: scrollPosition, behavior: "smooth" });
-    });
-
-    nextArrow.addEventListener("click", () => {
-      scrollPosition = Math.min(
-        scrollPosition + scrollStep,
-        carousel.scrollHeight - carousel.clientHeight
-      );
-      carousel.scrollTo({ top: scrollPosition, behavior: "smooth" });
-    });
-
-    renderItems();
   </script>
 
 </body>
