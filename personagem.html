@@ -229,88 +229,64 @@
     </div>
     <div class="arrow" id="nextArrow">↓</div>
   </div>
-<!-- 
 
-  <canvas id="canvas" width="400" height="400"></canvas> -->
-
+  <canvas id="canvas" width="400" height="400"></canvas> 
   <script>
+    // Obtém o personagem selecionado armazenado no armazenamento local
     const selectedCharacter = localStorage.getItem('selectedCharacter');
-
-    if (selectedCharacter) {
-      const img = new Image();
-      img.src = selectedCharacter;
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      };
-    } else {
-      alert('Nenhum personagem foi selecionado!');
-    }
-
-    // Recupera o personagem do localStorage
-    if (selectedCharacter) {
-      const characterImg = document.getElementById('selected-character');
-      characterImg.src = selectedCharacter; // Define a imagem do personagem
-    } else {
-      document.body.innerHTML = '<h1>Nenhum personagem foi selecionado!</h1>';
-    }
-
-  </script>
-
-  <script>
-
-    // Seleciona o botão e o canvas
-    const saveButton = document.getElementById("saveAvatar");
-
-    // Adiciona o evento de clique ao botão
-    saveButton.addEventListener("click", () => {
-      // Converte o conteúdo do canvas em uma URL de imagem PNG
-      const image = canvas.toDataURL("image/png");
-
-      // Cria um elemento de link temporário para download
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = "macho.png"; // Nome do arquivo salvo
-      link.click(); // Dispara o clique no link
-    });
-
-    // Elementos do Canvas
+    
+    // Inicializa a variável para armazenar a imagem do personagem
+    let characterImage = null;
+    
+    // Armazena os acessórios adicionados ao canvas
+    const accessoryImages = []; 
+    
+    // Acessório selecionado para mover ou redimensionar
+    let selectedAccessory = null;
+    
+    // Controla se o mouse está pressionado
+    let isDragging = false;
+    
+    // Indica se está redimensionando algum acessório
+    let resizing = null;
+    
+    // Obtém o elemento canvas do DOM e seu contexto 2d
     const canvas = document.getElementById("avatarCanvas");
     const ctx = canvas.getContext("2d");
-    const aquamanImage = new Image();
-    // aquamanImage.src = "images/aquaman_base.png";
-
-    // Array para armazenar acessórios adicionados
-    const accessoryImages = [];
-    let selectedAccessory = null; // Acessório atualmente selecionado para ajuste
-    let resizing = null; // Indica se está redimensionando (qual canto)
-    let isDragging = false; // Verifica se o mouse está pressionado
-
-    // Função para desenhar Aquaman e acessórios no canvas
-    function drawAquaman() {
+    
+    // Função para desenhar o personagem e seus acessórios no canvas
+    function drawCharacterAndAccessories() {
+      // Obtém a largura e altura do canvas
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
-
-      const scaleX = canvasWidth / aquamanImage.width;
-      const scaleY = canvasHeight / aquamanImage.height;
-      const scale = Math.min(scaleX, scaleY);
-
-      const newWidth = aquamanImage.width * scale;
-      const newHeight = aquamanImage.height * scale;
-
+    
+      // Calcula a escala para ajustar o personagem dentro do canvas
+      const scaleX = canvasWidth / characterImage.width;
+      const scaleY = canvasHeight / characterImage.height;
+      const scale = Math.min(scaleX, scaleY);  // A menor escala para ajustar o personagem
+    
+      
+      // Calcula a nova largura e altura do personagem
+      const newWidth = characterImage.width * scale;
+      const newHeight = characterImage.height * scale;
+    
+      // Limpa o canvas antes de desenhar novamente
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    
+      // Desenha o personagem no centro do canvas
       ctx.drawImage(
-        aquamanImage,
+        characterImage,
         (canvasWidth - newWidth) / 2,
         (canvasHeight - newHeight) / 2,
         newWidth,
         newHeight
       );
-
-      // Desenha os acessórios adicionados
+    
+      // Desenha todos os acessórios no canvas
       accessoryImages.forEach(({ img, x, y, width, height }) => {
         ctx.drawImage(img, x, y, width, height);
-
-        // Desenha marcadores somente no acessório selecionado
+    
+        // Desenha um marcador nos acessórios selecionados (quadrados nas bordas)
         if (selectedAccessory && selectedAccessory.img === img) {
           ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
           const corners = [
@@ -323,24 +299,37 @@
         }
       });
     }
-
-    // Função para adicionar um acessório ao canvas
-    function addAccessory(imageSrc) {
-      const accessoryImage = new Image();
-      accessoryImage.src = imageSrc;
-
-      accessoryImage.onload = () => {
-        const width = 100; // Tamanho inicial
-        const height = 100; // Tamanho inicial
-        const x = (canvas.width - width) / 2; // Centro inicial
-        const y = (canvas.height - height) / 2;
-
-        accessoryImages.push({ img: accessoryImage, x, y, width, height });
-        drawAquaman();
+    
+    // Função para carregar e definir a imagem do personagem
+    function setCharacter(imageSrc) {
+      characterImage = new Image();  // Cria uma nova imagem
+      characterImage.src = imageSrc;  // Define a fonte da imagem do personagem
+    
+      // Quando a imagem do personagem for carregada, desenha o personagem e os acessórios
+      characterImage.onload = () => {
+        drawCharacterAndAccessories();
       };
     }
-
-    // Detecta qual canto está sendo clicado
+    
+    // Função para adicionar um acessório ao canvas
+    function addAccessory(imageSrc) {
+      const accessoryImage = new Image();  // Cria uma nova imagem para o acessório
+      accessoryImage.src = imageSrc;  // Define a fonte do acessório
+    
+      // Quando a imagem do acessório for carregada, adiciona ao canvas
+      accessoryImage.onload = () => {
+        const width = 100;  // Tamanho inicial do acessório
+        const height = 100;  // Tamanho inicial do acessório
+        const x = (canvas.width - width) / 2;  // Posiciona no centro horizontal
+        const y = (canvas.height - height) / 2;  // Posiciona no centro vertical
+    
+        // Adiciona o acessório ao array de acessórios com suas propriedades
+        accessoryImages.push({ img: accessoryImage, x, y, width, height });
+        drawCharacterAndAccessories();  // Atualiza o canvas
+      };
+    }
+    
+    // Função para detectar se o mouse está sobre algum canto de um acessório (para mover ou redimensionar)
     function detectCorner(x, y, acc) {
       const cornerSize = 10;
       const corners = [
@@ -357,172 +346,256 @@
           y <= corner.y + cornerSize
       );
     }
-
-    // Eventos de interação no canvas para mover e redimensionar acessórios
+    
+    // Funções para mover e redimensionar acessórios
     canvas.addEventListener("mousedown", (event) => {
       const { offsetX, offsetY } = event;
-
-      // Verifica se está clicando em um canto
-      selectedAccessory = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
-      if (selectedAccessory) {
-        resizing = detectCorner(offsetX, offsetY, selectedAccessory).name;
-        isDragging = true;
-        return;
-      }
-
-      // Seleciona o item para mover
+    
+      // Encontra o acessório que foi clicado para começar a arrastar
       selectedAccessory = accessoryImages.find(
         ({ x, y, width, height }) =>
           offsetX >= x && offsetX <= x + width && offsetY >= y && offsetY <= y + height
       );
-
+    
       if (selectedAccessory) {
+        isDragging = true;  // Ativa o modo de arrastar
+      }
+    
+      // Verifica se está clicando em um canto de um acessório para redimensionar
+      resizing = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
+      if (resizing) {
         isDragging = true;
       }
-
-      drawAquaman(); // Atualiza o desenho ao selecionar
+    
+      drawCharacterAndAccessories();  // Atualiza o canvas
     });
-
+    
     canvas.addEventListener("mousemove", (event) => {
       if (isDragging && selectedAccessory) {
         const { offsetX, offsetY } = event;
-
+    
         if (resizing) {
-          // Redimensiona o acessório baseado no canto
-          if (resizing === "top-left") {
+          // Redimensiona o acessório com base no canto clicado
+          if (resizing.name === "top-left") {
             selectedAccessory.width += selectedAccessory.x - offsetX;
             selectedAccessory.height += selectedAccessory.y - offsetY;
             selectedAccessory.x = offsetX;
             selectedAccessory.y = offsetY;
-          } else if (resizing === "top-right") {
+          } else if (resizing.name === "top-right") {
             selectedAccessory.width = offsetX - selectedAccessory.x;
             selectedAccessory.height += selectedAccessory.y - offsetY;
             selectedAccessory.y = offsetY;
-          } else if (resizing === "bottom-left") {
+          } else if (resizing.name === "bottom-left") {
             selectedAccessory.width += selectedAccessory.x - offsetX;
             selectedAccessory.height = offsetY - selectedAccessory.y;
             selectedAccessory.x = offsetX;
-          } else if (resizing === "bottom-right") {
+          } else if (resizing.name === "bottom-right") {
             selectedAccessory.width = offsetX - selectedAccessory.x;
             selectedAccessory.height = offsetY - selectedAccessory.y;
           }
         } else {
-          // Move o acessório
+          // Mover o acessório
           selectedAccessory.x = offsetX - selectedAccessory.width / 2;
           selectedAccessory.y = offsetY - selectedAccessory.height / 2;
         }
-
-        drawAquaman();
+    
+        drawCharacterAndAccessories();  // Atualiza o canvas
       }
     });
-
+    
+    // Quando o mouse é solto, desativa o arrasto e o redimensionamento
     canvas.addEventListener("mouseup", () => {
-      isDragging = false;
-      resizing = null;
+      isDragging = false;  // Desativa o arrasto
+      resizing = null;  // Reseta o redimensionamento
+    });
+    
+    // Função para salvar a imagem do canvas como PNG
+    const saveButton = document.getElementById("saveAvatar");
+    saveButton.addEventListener("click", () => {
+      const image = canvas.toDataURL("image/png");  // Converte o canvas para uma imagem PNG
+    
+      const link = document.createElement("a");  // Cria um link para o download
+      link.href = image;
+      link.download = "macho.png";  // Define o nome do arquivo
+      link.click();  // Inicia o download
+    });
+    
+    // Se um personagem foi selecionado, carrega a imagem
+    if (selectedCharacter) {
+      setCharacter(selectedCharacter);  // Carrega a imagem do personagem
+    } else {
+      alert('Nenhum personagem foi selecionado!');  // Exibe um alerta caso nenhum personagem tenha sido selecionado
+    }
+    
+// Gerenciamento de categorias e itens do carrossel
+const tabs = document.querySelectorAll(".tab"); // Seleciona todas as abas de categorias (ex: óculos, bolsas, laços)
+const carousel = document.getElementById("carousel"); // Seleciona o carrossel onde os itens serão exibidos
+
+// Define as categorias e seus respectivos itens (imagens dos acessórios)
+const items = {
+  oculos: [
+    "images/oculos-rose-glitter.png",
+    "images/oculos-brown.png",
+    "images/juliete.png",
+    "images/oculos-blue-pink.png",
+    "images/cachecol-rosa.png",
+  ],
+  bolsas: [
+    "images/bag-pink.png",
+    "images/mini-bag-pink.png",
+    "images/vestido-cereja.png",
+    "images/short-bege.png",
+    "images/cachecol-rosa.png",
+  ],
+  lacos: [
+    "images/laço-rosa.png",
+    "images/cachecol-rosa.png",
+    "images/oculos-blue-pink.png",
+    "images/oculos-rose-glitter.png",
+    "images/short-bege.png",
+  ],
+};
+
+let currentIndex = 0; // Índice que mantém a referência da categoria atualmente selecionada
+
+// Função para renderizar os itens de uma categoria no carrossel
+function renderItems(category) {
+  const categoryItems = items[category]; // Obtém os itens da categoria selecionada
+  carousel.innerHTML = ""; // Limpa os itens atuais do carrossel
+
+  // Para cada item da categoria, cria um novo elemento de imagem e o adiciona ao carrossel
+  categoryItems.forEach((imageSrc) => {
+    const item = document.createElement("div"); // Cria o item do carrossel
+    item.classList.add("carousel-item"); // Adiciona a classe CSS para estilo
+
+    const img = document.createElement("img"); // Cria a imagem do acessório
+    img.src = imageSrc; // Define o caminho da imagem do acessório
+    img.alt = "Acessório"; // Define um texto alternativo para a imagem
+    item.appendChild(img); // Adiciona a imagem ao item
+
+    // Adiciona um evento de clique para adicionar o acessório ao canvas
+    item.addEventListener("click", () => {
+      addAccessory(imageSrc); // Chama a função para adicionar o acessório no canvas
     });
 
-    // Remove seleção ao clicar fora do canvas
-    document.addEventListener("click", (event) => {
-      if (!canvas.contains(event.target)) {
-        selectedAccessory = null;
-        resizing = null;
-        isDragging = false;
-        drawAquaman();
+    carousel.appendChild(item); // Adiciona o item ao carrossel
+  });
+}
+
+// Função para atualizar as abas de categorias (ativa a aba correspondente à categoria selecionada)
+function updateTabs() {
+  tabs.forEach((tab, index) => {
+    tab.classList.toggle("active", index === currentIndex); // Marca a aba ativa
+  });
+
+  const category = tabs[currentIndex].dataset.category; // Obtém a categoria associada à aba ativa
+  renderItems(category); // Chama a função para renderizar os itens da categoria ativa
+}
+
+// Adiciona eventos de clique nas abas para alternar entre as categorias
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => {
+    currentIndex = index; // Atualiza o índice da categoria selecionada
+    updateTabs(); // Atualiza as abas e os itens exibidos no carrossel
+  });
+});
+
+// Inicializa a primeira categoria no carrossel
+updateTabs();
+
+
+
+
+
+
+// Eventos de interação no canvas para mover e redimensionar acessórios
+canvas.addEventListener("mousedown", (event) => {
+  const { offsetX, offsetY } = event;
+
+  // Verifica se está clicando em um canto para redimensionamento
+  selectedAccessory = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
+  if (selectedAccessory) {
+    resizing = detectCorner(offsetX, offsetY, selectedAccessory).name; // Define o canto sendo redimensionado
+    isDragging = true; // Inicia a ação de redimensionamento
+    return;
+  }
+
+  // Seleciona o acessório para movimentação
+  selectedAccessory = accessoryImages.find(
+    ({ x, y, width, height }) =>
+      offsetX >= x && offsetX <= x + width && offsetY >= y && offsetY <= y + height
+  );
+
+  if (selectedAccessory) {
+    isDragging = true; // Inicia a ação de movimentação
+  }
+
+  drawAquaman(); // Atualiza o desenho para refletir a seleção
+});
+
+canvas.addEventListener("mousemove", (event) => {
+  if (isDragging && selectedAccessory) {
+    const { offsetX, offsetY } = event;
+
+    if (resizing) {
+      // Lógica para redimensionar baseado no canto selecionado
+      if (resizing === "top-left") {
+        selectedAccessory.width += selectedAccessory.x - offsetX;
+        selectedAccessory.height += selectedAccessory.y - offsetY;
+        selectedAccessory.x = offsetX;
+        selectedAccessory.y = offsetY;
+      } else if (resizing === "top-right") {
+        selectedAccessory.width = offsetX - selectedAccessory.x;
+        selectedAccessory.height += selectedAccessory.y - offsetY;
+        selectedAccessory.y = offsetY;
+      } else if (resizing === "bottom-left") {
+        selectedAccessory.width += selectedAccessory.x - offsetX;
+        selectedAccessory.height = offsetY - selectedAccessory.y;
+        selectedAccessory.x = offsetX;
+      } else if (resizing === "bottom-right") {
+        selectedAccessory.width = offsetX - selectedAccessory.x;
+        selectedAccessory.height = offsetY - selectedAccessory.y;
       }
-    });
-
-    // Evento para deletar o item selecionado
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Delete" && selectedAccessory) {
-        const index = accessoryImages.indexOf(selectedAccessory);
-        if (index !== -1) {
-          accessoryImages.splice(index, 1);
-        }
-        selectedAccessory = null;
-        drawAquaman();
-      }
-    });
-
-    // Inicializa o desenho do Aquaman no canvas
-    aquamanImage.onload = drawAquaman;
-
-
-
-    // Gerenciamento de categorias e itens do carrossel
-    const tabs = document.querySelectorAll(".tab");
-    const carousel = document.getElementById("carousel");
-
-    const items = {
-      oculos: [
-        "images/oculos-rose-glitter.png",
-        "images/oculos-brown.png",
-        "images/juliete.png",
-        "images/oculos-blue-pink.png",
-        "images/cachecol-rosa.png",
-      ],
-      bolsas: [
-        "images/bag-pink.png",
-        "images/mini-bag-pink.png",
-        "images/vestido-cereja.png",
-        "images/short-bege.png",
-        "images/cachecol-rosa.png",
-      ],
-      lacos: [
-        "images/laço-rosa.png",
-        "images/cachecol-rosa.png",
-        "images/oculos-blue-pink.png",
-        "images/oculos-rose-glitter.png",
-        "images/short-bege.png",
-      ],
-    };
-
-    let currentIndex = 0;
-
-    function renderItems(category) {
-      const categoryItems = items[category];
-      carousel.innerHTML = ""; // Limpa itens anteriores
-
-      categoryItems.forEach((imageSrc) => {
-        const item = document.createElement("div");
-        item.classList.add("carousel-item");
-
-        const img = document.createElement("img");
-        img.src = imageSrc;
-        img.alt = "Acessório";
-        item.appendChild(img);
-
-        item.addEventListener("click", () => {
-          addAccessory(imageSrc); // Adiciona o acessório ao canvas
-        });
-
-        carousel.appendChild(item);
-      });
+    } else {
+      // Lógica para movimentação do acessório
+      selectedAccessory.x = offsetX - selectedAccessory.width / 2;
+      selectedAccessory.y = offsetY - selectedAccessory.height / 2;
     }
 
-    function updateTabs() {
-      tabs.forEach((tab, index) => {
-        tab.classList.toggle("active", index === currentIndex);
-      });
+    drawAquaman(); // Atualiza o desenho com os ajustes feitos
+  }
+});
 
-      const category = tabs[currentIndex].dataset.category;
-      renderItems(category);
+canvas.addEventListener("mouseup", () => {
+  isDragging = false; // Finaliza a movimentação/redimensionamento
+  resizing = null;
+});
+
+
+// Evento de tecla pressionada para deletar o acessório selecionado
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Delete" && selectedAccessory) {
+    // Encontra o índice do acessório selecionado
+    const index = accessoryImages.findIndex(
+      (accessory) => accessory.img === selectedAccessory.img
+    );
+
+    if (index !== -1) {
+      // Remove o acessório do array
+      accessoryImages.splice(index, 1);
+
+      // Reseta o acessório selecionado
+      selectedAccessory = null;
+
+      // Atualiza o canvas
+      drawCharacterAndAccessories();
     }
-
-    tabs.forEach((tab, index) => {
-      tab.addEventListener("click", () => {
-        currentIndex = index;
-        updateTabs();
-      });
-    });
-
-    // Inicializa a primeira categoria no carrossel
-    updateTabs();
-
-
-
-
+  }
+});
 
   </script>
+  
+  
 
 </body>
 
