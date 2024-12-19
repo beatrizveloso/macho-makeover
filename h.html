@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personagem Selecionado</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        #canvas {
+            margin-top: 20px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Personagem Selecionado</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script>
+           const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const selectedCharacter = localStorage.getItem('selectedCharacter');
+
+        if (selectedCharacter) {
+            const img = new Image();
+            img.src = selectedCharacter;
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+        } else {
+            alert('Nenhum personagem foi selecionado!');
+        }
+
+        // Recupera o personagem do localStorage
+        if (selectedCharacter) {
+            const characterImg = document.getElementById('selected-character');
+            characterImg.src = selectedCharacter; // Define a imagem do personagem
+        } else {
+            document.body.innerHTML = '<h1>Nenhum personagem foi selecionado!</h1>';
+        }
+
+    </script>
+
+</body>
+</html>
