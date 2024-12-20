@@ -12,7 +12,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-image: url('/images/home2.png');
+    background-image: url('/images/home.png');
     background-size: cover;
     /* A imagem vai cobrir toda a tela */
     background-position: center;
@@ -30,7 +30,7 @@ button {
     width: 290px;
     height: 80px;
     border-radius: 80px;
-    margin-top: 50px;
+    margin-top: 40px;
     margin-right: 440px;
     background: none;
     background: linear-gradient(#ec91d1, #940168);
@@ -59,7 +59,7 @@ p {
     font-size: 22px;
     font-family: "Inter", serif;
     font-weight: 600;
-    margin-top: 300px;
+    margin-top: 270px;
     margin-right: 440px;
     width: 440px;
     background: none;
@@ -67,14 +67,14 @@ p {
 }
 
 
-@media (max-width: 480px) {
+@media (max-width: 500px) {
     
 body {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-image: url('/images/celular.png');
+    background-image: url('/images/celular3.png');
 }
     button {
         font-size: 14px;
