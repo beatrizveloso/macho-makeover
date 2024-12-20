@@ -65,3 +65,28 @@ p {
     background: none;
     text-align: center;
 }
+
+
+@media (max-width: 480px) {
+    
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-image: url('/images/celular.png');
+}
+    button {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    button h1 {
+        font-size: 14px;
+    }
+
+    button img {
+        width: 18px;
+        height: 18px;
+    }
+}
