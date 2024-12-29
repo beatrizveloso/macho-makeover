@@ -1,4 +1,5 @@
-# Joguinho de zoeira que criei com ChatGPT
-![image](https://github.com/user-attachments/assets/0a31e89e-2b40-4563-81cc-df05dc4134b3)
-![image](https://github.com/user-attachments/assets/6d48c3ee-390f-4659-b276-1c38a1a6d440)
-![image](https://github.com/user-attachments/assets/698a58c6-07aa-484a-93ac-e498a1c75c7a)
+# Jogo Macho Makeover
+Machomakeover é um jogo criativo e divertido, criado por mim, onde o jogador transforma personagens machões em versões femininas e delicadas. Com acessórios únicos, o jogo promove humor, estilo e muita interação, desafiando o jogador a explorar sua criatividade enquanto reinventa visuais ousados e inesperados.
+![image](https://github.com/user-attachments/assets/819b33ea-910b-489e-83bf-e321f34cc2f5)
+![image](https://github.com/user-attachments/assets/6ca64339-4c2f-4323-8696-1c8102db32af)
+![image](https://github.com/user-attachments/assets/1c10d8e7-a71a-43b3-a3fd-4ca2f3b4760d)
