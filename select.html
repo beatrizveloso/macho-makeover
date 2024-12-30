@@ -122,15 +122,35 @@
             width: 50px;
             margin-left: 10px;
         }
+
+        @media (max-width: 600px) {
+
+            .text {
+            display: flex;
+            flex-direction: column;
+        }
+
+            .one img {
+                width: 380px;
+                height: 70px;
+                margin-bottom: -30px;
+            }
+            .two img {
+                width: 200px;
+                height: 70px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="text">
-        <h1>
+        <div class="one">
             <img src="http://www.gigaglitters.com/created/F5LYma4SVL.gif" width="460" height="90" alt="">
+        </div>
+        <div class="two">
             <img src="http://www.gigaglitters.com/created/hmXs2jRS7q.gif" width="270" height="90" alt="">
-        </h1>
+        </div>
     </div>
 
     <div class="carousel">
