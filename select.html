@@ -155,7 +155,7 @@
 
     <div class="carousel">
         <div class="carousel-track">
-            <!-- 8 personagens -->
+
             <div class="carousel-item"><img src="images/aquaman_base.png" alt="Aquaman"></div>
             <div class="carousel-item"><img src="images/the_rock_base.png" alt="The Rock"></div>
             <div class="carousel-item"><img src="images/capitao-america.png" alt="Thor"></div>
@@ -191,7 +191,6 @@
         const itemAngle = 360 / itemCount;
         let selectedCharacter = null;
 
-        // Posiciona os itens no espaço 3D
         items.forEach((item, index) => {
             const angle = index * itemAngle;
             item.style.transform = `rotateY(${angle}deg) translateZ(300px)`;
@@ -205,7 +204,6 @@
         nextButton.addEventListener('click', () => rotateCarousel(-1));
         prevButton.addEventListener('click', () => rotateCarousel(1));
 
-        // Lógica de seleção
         items.forEach((item) => {
             item.addEventListener('click', () => {
                 selectedCharacter = item.querySelector('img').src;
