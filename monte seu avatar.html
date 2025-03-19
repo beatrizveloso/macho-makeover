@@ -108,7 +108,7 @@
 
     #saveAvatar img {
       width: 50px;
-      height: 50px;
+      height: 45px;
       padding-top: 15px;
       padding-left: 5px;
       background: none;
@@ -248,6 +248,7 @@
 
   <canvas id="canvas" width="400" height="400"></canvas>
   <script>
+
     document.getElementById("prevArrow").addEventListener("click", () => {
       const carousel = document.getElementById("carousel");
       carousel.scrollBy({
@@ -256,7 +257,6 @@
       });
     });
 
-    // Função para mover o carrossel para baixo
     document.getElementById("nextArrow").addEventListener("click", () => {
       const carousel = document.getElementById("carousel");
       carousel.scrollBy({
