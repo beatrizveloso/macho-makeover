@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,235 +8,240 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="images/diamante.png">
 </head>
+
 <body>
 
-    <p>Bem-vindo ao Macho Makeover, onde até o machão da firma pode virar a diva do glitter! </p>
-    
-    <a href="select.html">
-        <button>
-        <h1>Vamos começar</h1> 
-        <img src="images/diamante.png" alt="">
-        </button>
-</a>
+    <div class="text">
 
-<script>
-    const canvas = document.getElementById('avatarCanvas');
-const ctx = canvas.getContext('2d');
+        <p>Bem-vindo ao Macho Makeover, onde até o machão da firma pode virar a diva do glitter! </p>
 
-const objects = [];
+        <a href="select.html">
+            <button>
+                <h1>Vamos começar</h1>
+                <img src="images/diamante.png" alt="">
+            </button>
+        </a>
+    </div>
 
-let currentObject = null;
-let isDragging = false;
-let isResizing = false;
-let resizeCorner = null; 
+    <script>
+        const canvas = document.getElementById('avatarCanvas');
+        const ctx = canvas.getContext('2d');
 
-const aquamanImage = new Image();
-aquamanImage.src = 'images/aquaman_base.png'; 
-aquamanImage.onload = () => {
-    objects.push({
-        image: aquamanImage,
-        x: 0,
-        y: 0,
-        width: canvas.width, 
-        height: canvas.height,
-        selected: false,
-        draggable: false, 
-        resizable: false 
-    });
-    drawCanvas();
-};
+        const objects = [];
 
-function drawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    objects.forEach(obj => {
-        ctx.drawImage(obj.image, obj.x, obj.y, obj.width, obj.height);
-        if (obj.selected) {
-            drawResizeHandles(obj);
+        let currentObject = null;
+        let isDragging = false;
+        let isResizing = false;
+        let resizeCorner = null;
+
+        const aquamanImage = new Image();
+        aquamanImage.src = 'images/aquaman_base.png';
+        aquamanImage.onload = () => {
+            objects.push({
+                image: aquamanImage,
+                x: 0,
+                y: 0,
+                width: canvas.width,
+                height: canvas.height,
+                selected: false,
+                draggable: false,
+                resizable: false
+            });
+            drawCanvas();
+        };
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            objects.forEach(obj => {
+                ctx.drawImage(obj.image, obj.x, obj.y, obj.width, obj.height);
+                if (obj.selected) {
+                    drawResizeHandles(obj);
+                }
+            });
         }
-    });
-}
 
-function drawResizeHandles(obj) {
-    const handles = [
-        { x: obj.x, y: obj.y }, // Top-lef
-        { x: obj.x + obj.width, y: obj.y }, 
-        { x: obj.x, y: obj.y + obj.height }, 
-        { x: obj.x + obj.width, y: obj.y + obj.height } 
-    ];
+        function drawResizeHandles(obj) {
+            const handles = [
+                { x: obj.x, y: obj.y }, // Top-lef
+                { x: obj.x + obj.width, y: obj.y },
+                { x: obj.x, y: obj.y + obj.height },
+                { x: obj.x + obj.width, y: obj.y + obj.height }
+            ];
 
-    ctx.fillStyle = 'blue';
-    handles.forEach(handle => {
-        ctx.fillRect(handle.x - 5, handle.y - 5, 10, 10);
-    });
-}
+            ctx.fillStyle = 'blue';
+            handles.forEach(handle => {
+                ctx.fillRect(handle.x - 5, handle.y - 5, 10, 10);
+            });
+        }
 
-function getObjectAtPosition(x, y) {
-    for (let i = objects.length - 1; i >= 0; i--) {
-        const obj = objects[i];
-    
-        const corners = [
-            { x: obj.x, y: obj.y, corner: 'tl' },
-            { x: obj.x + obj.width, y: obj.y, corner: 'tr' },
-            { x: obj.x, y: obj.y + obj.height, corner: 'bl' },
-            { x: obj.x + obj.width, y: obj.y + obj.height, corner: 'br' }
-        ];
+        function getObjectAtPosition(x, y) {
+            for (let i = objects.length - 1; i >= 0; i--) {
+                const obj = objects[i];
 
-        for (const corner of corners) {
-            if (
-                x >= corner.x - 5 &&
-                x <= corner.x + 5 &&
-                y >= corner.y - 5 &&
-                y <= corner.y + 5
-            ) {
-                return { object: obj, resizeCorner: corner.corner };
+                const corners = [
+                    { x: obj.x, y: obj.y, corner: 'tl' },
+                    { x: obj.x + obj.width, y: obj.y, corner: 'tr' },
+                    { x: obj.x, y: obj.y + obj.height, corner: 'bl' },
+                    { x: obj.x + obj.width, y: obj.y + obj.height, corner: 'br' }
+                ];
+
+                for (const corner of corners) {
+                    if (
+                        x >= corner.x - 5 &&
+                        x <= corner.x + 5 &&
+                        y >= corner.y - 5 &&
+                        y <= corner.y + 5
+                    ) {
+                        return { object: obj, resizeCorner: corner.corner };
+                    }
+                }
+
+                if (
+                    x > obj.x &&
+                    x < obj.x + obj.width &&
+                    y > obj.y &&
+                    y < obj.y + obj.height
+                ) {
+                    return { object: obj, resizeCorner: null };
+                }
             }
+            return null;
         }
 
-        if (
-            x > obj.x &&
-            x < obj.x + obj.width &&
-            y > obj.y &&
-            y < obj.y + obj.height
-        ) {
-            return { object: obj, resizeCorner: null };
-        }
-    }
-    return null;
-}
-
-canvas.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const src = e.dataTransfer.getData('accessory');
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-        objects.push({
-            image: img,
-            x: e.offsetX - img.width / 2,
-            y: e.offsetY - img.height / 2,
-            width: img.width,
-            height: img.height,
-            selected: false,
-            draggable: true,
-            resizable: true
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const src = e.dataTransfer.getData('accessory');
+            const img = new Image();
+            img.src = src;
+            img.onload = () => {
+                objects.push({
+                    image: img,
+                    x: e.offsetX - img.width / 2,
+                    y: e.offsetY - img.height / 2,
+                    width: img.width,
+                    height: img.height,
+                    selected: false,
+                    draggable: true,
+                    resizable: true
+                });
+                drawCanvas();
+            };
         });
-        drawCanvas();
-    };
-});
 
-canvas.addEventListener('dragover', (e) => e.preventDefault());
+        canvas.addEventListener('dragover', (e) => e.preventDefault());
 
-canvas.addEventListener('mousedown', (e) => {
-    const { offsetX: x, offsetY: y } = e;
-    const result = getObjectAtPosition(x, y);
+        canvas.addEventListener('mousedown', (e) => {
+            const { offsetX: x, offsetY: y } = e;
+            const result = getObjectAtPosition(x, y);
 
-    if (result) {
-        currentObject = result.object;
-        currentObject.selected = true;
-        isResizing = !!result.resizeCorner;
-        resizeCorner = result.resizeCorner;
-        isDragging = !isResizing;
+            if (result) {
+                currentObject = result.object;
+                currentObject.selected = true;
+                isResizing = !!result.resizeCorner;
+                resizeCorner = result.resizeCorner;
+                isDragging = !isResizing;
 
-        objects.splice(objects.indexOf(currentObject), 1);
-        objects.push(currentObject);
+                objects.splice(objects.indexOf(currentObject), 1);
+                objects.push(currentObject);
 
-        drawCanvas();
-    } else {
-        currentObject = null;
-        objects.forEach(obj => (obj.selected = false));
-        drawCanvas();
-    }
-});
-
-canvas.addEventListener('mousemove', (e) => {
-    if (!currentObject) return;
-
-    const { offsetX: x, offsetY: y } = e;
-
-    if (isDragging) {
-        currentObject.x = x - currentObject.width / 2;
-        currentObject.y = y - currentObject.height / 2;
-        drawCanvas();
-    } else if (isResizing) {
-        switch (resizeCorner) {
-            case 'tl': 
-                currentObject.width += currentObject.x - x;
-                currentObject.height += currentObject.y - y;
-                currentObject.x = x;
-                currentObject.y = y;
-                break;
-            case 'tr': 
-                currentObject.width = x - currentObject.x;
-                currentObject.height += currentObject.y - y;
-                currentObject.y = y;
-                break;
-            case 'bl': 
-                currentObject.width += currentObject.x - x;
-                currentObject.height = y - currentObject.y;
-                currentObject.x = x;
-                break;
-            case 'br': 
-                currentObject.width = x - currentObject.x;
-                currentObject.height = y - currentObject.y;
-                break;
-        }
-        drawCanvas();
-    }
-});
-
-canvas.addEventListener('mouseup', () => {
-    isDragging = false;
-    isResizing = false;
-    resizeCorner = null;
-});
-
-document.getElementById('saveAvatar').addEventListener('click', () => {
-    const link = document.createElement('a');
-    link.download = 'macho.png';
-    link.href = canvas.toDataURL();
-    link.click();
-});
-
-function addAccessory(imageSrc) {
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = () => {
-        objects.push({
-            image: img,
-            x: canvas.width / 2 - img.width / 2, 
-            y: canvas.height / 2 - img.height / 2,
-            width: img.width,
-            height: img.height,
-            selected: false,
-            draggable: true,
-            resizable: true
+                drawCanvas();
+            } else {
+                currentObject = null;
+                objects.forEach(obj => (obj.selected = false));
+                drawCanvas();
+            }
         });
-        drawCanvas();
-    };
-}
 
-canvas.addEventListener('mousedown', (e) => {
-    const { offsetX: x, offsetY: y } = e;
-    const result = getObjectAtPosition(x, y);
+        canvas.addEventListener('mousemove', (e) => {
+            if (!currentObject) return;
 
-    if (result) {
-        currentObject = result.object;
-        currentObject.selected = true;
-        isResizing = !!result.resizeCorner;
-        resizeCorner = result.resizeCorner;
-        isDragging = !isResizing;
+            const { offsetX: x, offsetY: y } = e;
 
-        objects.splice(objects.indexOf(currentObject), 1);
-        objects.push(currentObject);
+            if (isDragging) {
+                currentObject.x = x - currentObject.width / 2;
+                currentObject.y = y - currentObject.height / 2;
+                drawCanvas();
+            } else if (isResizing) {
+                switch (resizeCorner) {
+                    case 'tl':
+                        currentObject.width += currentObject.x - x;
+                        currentObject.height += currentObject.y - y;
+                        currentObject.x = x;
+                        currentObject.y = y;
+                        break;
+                    case 'tr':
+                        currentObject.width = x - currentObject.x;
+                        currentObject.height += currentObject.y - y;
+                        currentObject.y = y;
+                        break;
+                    case 'bl':
+                        currentObject.width += currentObject.x - x;
+                        currentObject.height = y - currentObject.y;
+                        currentObject.x = x;
+                        break;
+                    case 'br':
+                        currentObject.width = x - currentObject.x;
+                        currentObject.height = y - currentObject.y;
+                        break;
+                }
+                drawCanvas();
+            }
+        });
 
-        drawCanvas();
-    } else {
-        currentObject = null;
-        objects.forEach(obj => (obj.selected = false));
-        drawCanvas();
-    }
-});
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            isResizing = false;
+            resizeCorner = null;
+        });
 
-</script>
+        document.getElementById('saveAvatar').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'macho.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        function addAccessory(imageSrc) {
+            const img = new Image();
+            img.src = imageSrc;
+            img.onload = () => {
+                objects.push({
+                    image: img,
+                    x: canvas.width / 2 - img.width / 2,
+                    y: canvas.height / 2 - img.height / 2,
+                    width: img.width,
+                    height: img.height,
+                    selected: false,
+                    draggable: true,
+                    resizable: true
+                });
+                drawCanvas();
+            };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const { offsetX: x, offsetY: y } = e;
+            const result = getObjectAtPosition(x, y);
+
+            if (result) {
+                currentObject = result.object;
+                currentObject.selected = true;
+                isResizing = !!result.resizeCorner;
+                resizeCorner = result.resizeCorner;
+                isDragging = !isResizing;
+
+                objects.splice(objects.indexOf(currentObject), 1);
+                objects.push(currentObject);
+
+                drawCanvas();
+            } else {
+                currentObject = null;
+                objects.forEach(obj => (obj.selected = false));
+                drawCanvas();
+            }
+        });
+
+    </script>
 </body>
+
 </html>

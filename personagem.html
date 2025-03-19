@@ -106,6 +106,14 @@
       cursor: not-allowed;
     }
 
+    #saveAvatar img {
+      width: 50px;
+      height: 50px;
+      padding-top: 15px;
+      padding-left: 5px;
+      background: none;
+    }
+
     .carousel {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -199,7 +207,7 @@
     }
 
     @media (max-width: 600px) {
-      body{
+      body {
         display: flex;
         flex-direction: column;
       }
@@ -243,8 +251,8 @@
     document.getElementById("prevArrow").addEventListener("click", () => {
       const carousel = document.getElementById("carousel");
       carousel.scrollBy({
-        top: -carousel.clientHeight, 
-        behavior: 'smooth' 
+        top: -carousel.clientHeight,
+        behavior: 'smooth'
       });
     });
 
@@ -253,7 +261,7 @@
       const carousel = document.getElementById("carousel");
       carousel.scrollBy({
         top: carousel.clientHeight,
-        behavior: 'smooth' 
+        behavior: 'smooth'
       });
     });
     const selectedCharacter = localStorage.getItem('selectedCharacter');
@@ -277,7 +285,7 @@
 
       const scaleX = canvasWidth / characterImage.width;
       const scaleY = canvasHeight / characterImage.height;
-      const scale = Math.min(scaleX, scaleY);  
+      const scale = Math.min(scaleX, scaleY);
 
       const newWidth = characterImage.width * scale;
       const newHeight = characterImage.height * scale;
@@ -298,9 +306,9 @@
         if (selectedAccessory && selectedAccessory.img === img) {
           ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
           const corners = [
-            { x: x - 5, y: y - 5 }, 
-            { x: x + width - 5, y: y - 5 }, 
-            { x: x - 5, y: y + height - 5 }, 
+            { x: x - 5, y: y - 5 },
+            { x: x + width - 5, y: y - 5 },
+            { x: x - 5, y: y + height - 5 },
             { x: x + width - 5, y: y + height - 5 },
           ];
           corners.forEach(({ x, y }) => ctx.fillRect(x, y, 10, 10));
@@ -309,26 +317,26 @@
     }
 
     function setCharacter(imageSrc) {
-      characterImage = new Image();  
-      characterImage.src = imageSrc; 
-  
+      characterImage = new Image();
+      characterImage.src = imageSrc;
+
       characterImage.onload = () => {
         drawCharacterAndAccessories();
       };
     }
 
     function addAccessory(imageSrc) {
-      const accessoryImage = new Image();  
-      accessoryImage.src = imageSrc;  
+      const accessoryImage = new Image();
+      accessoryImage.src = imageSrc;
 
       accessoryImage.onload = () => {
-        const width = 100;  
-        const height = 100; 
-        const x = (canvas.width - width) / 2;  
-        const y = (canvas.height - height) / 2; 
+        const width = 100;
+        const height = 100;
+        const x = (canvas.width - width) / 2;
+        const y = (canvas.height - height) / 2;
 
         accessoryImages.push({ img: accessoryImage, x, y, width, height });
-        drawCharacterAndAccessories();  
+        drawCharacterAndAccessories();
       };
     }
 
@@ -358,7 +366,7 @@
       );
 
       if (selectedAccessory) {
-        isDragging = true;  
+        isDragging = true;
       }
 
       resizing = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
@@ -366,7 +374,7 @@
         isDragging = true;
       }
 
-      drawCharacterAndAccessories();  
+      drawCharacterAndAccessories();
     });
 
     canvas.addEventListener("mousemove", (event) => {
@@ -396,33 +404,33 @@
           selectedAccessory.y = offsetY - selectedAccessory.height / 2;
         }
 
-        drawCharacterAndAccessories();  
+        drawCharacterAndAccessories();
       }
     });
 
     canvas.addEventListener("mouseup", () => {
-      isDragging = false;  
-      resizing = null; 
+      isDragging = false;
+      resizing = null;
     });
 
     const saveButton = document.getElementById("saveAvatar");
     saveButton.addEventListener("click", () => {
-      const image = canvas.toDataURL("image/png");  
+      const image = canvas.toDataURL("image/png");
 
-      const link = document.createElement("a"); 
+      const link = document.createElement("a");
       link.href = image;
-      link.download = "macho.png";  
-      link.click(); 
+      link.download = "macho.png";
+      link.click();
     });
 
     if (selectedCharacter) {
-      setCharacter(selectedCharacter); 
+      setCharacter(selectedCharacter);
     } else {
-      alert('Nenhum personagem foi selecionado!'); 
+      alert('Nenhum personagem foi selecionado!');
     }
 
-    const tabs = document.querySelectorAll(".tab"); 
-    const carousel = document.getElementById("carousel"); 
+    const tabs = document.querySelectorAll(".tab");
+    const carousel = document.getElementById("carousel");
     const items = {
       cabelos: [
         "images/cabelo1.png",
@@ -509,35 +517,35 @@
         "images/bolsa10.png"
       ],
     };
-    
+
     let currentIndex = 0;
     function renderItems(category) {
-      const categoryItems = items[category]; 
-      carousel.innerHTML = ""; 
+      const categoryItems = items[category];
+      carousel.innerHTML = "";
       categoryItems.forEach((imageSrc) => {
-        const item = document.createElement("div"); 
+        const item = document.createElement("div");
         item.classList.add("carousel-item");
-        const img = document.createElement("img"); 
-        img.src = imageSrc; 
-        img.alt = "Acessório"; 
-        item.appendChild(img); 
+        const img = document.createElement("img");
+        img.src = imageSrc;
+        img.alt = "Acessório";
+        item.appendChild(img);
         item.addEventListener("click", () => {
           addAccessory(imageSrc);
         });
-        carousel.appendChild(item); 
+        carousel.appendChild(item);
       });
     }
     function updateTabs() {
       tabs.forEach((tab, index) => {
-        tab.classList.toggle("active", index === currentIndex); 
+        tab.classList.toggle("active", index === currentIndex);
       });
-      const category = tabs[currentIndex].dataset.category; 
+      const category = tabs[currentIndex].dataset.category;
       renderItems(category);
     }
     tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => {
-        currentIndex = index; 
-        updateTabs(); 
+        currentIndex = index;
+        updateTabs();
       });
     });
     updateTabs();
@@ -545,8 +553,8 @@
       const { offsetX, offsetY } = event;
       selectedAccessory = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
       if (selectedAccessory) {
-        resizing = detectCorner(offsetX, offsetY, selectedAccessory).name; 
-        isDragging = true; 
+        resizing = detectCorner(offsetX, offsetY, selectedAccessory).name;
+        isDragging = true;
         return;
       }
       selectedAccessory = accessoryImages.find(
@@ -554,9 +562,9 @@
           offsetX >= x && offsetX <= x + width && offsetY >= y && offsetY <= y + height
       );
       if (selectedAccessory) {
-        isDragging = true; 
+        isDragging = true;
       }
-      drawAquaman(); 
+      drawAquaman();
     });
     canvas.addEventListener("mousemove", (event) => {
       if (isDragging && selectedAccessory) {
@@ -584,11 +592,11 @@
           selectedAccessory.x = offsetX - selectedAccessory.width / 2;
           selectedAccessory.y = offsetY - selectedAccessory.height / 2;
         }
-        drawAquaman(); 
+        drawAquaman();
       }
     });
     canvas.addEventListener("mouseup", () => {
-      isDragging = false; 
+      isDragging = false;
       resizing = null;
     });
     document.addEventListener("keydown", (event) => {

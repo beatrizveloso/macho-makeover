@@ -6,7 +6,6 @@
     box-sizing: border-box;
     text-decoration: none;
 }
-
 body {
     display: flex;
     flex-direction: column;
@@ -14,15 +13,40 @@ body {
     align-items: center;
     background-image: url('/images/home.png');
     background-size: cover;
-    /* A imagem vai cobrir toda a tela */
     background-position: center;
-    /* A imagem vai ser centralizada */
     background-repeat: no-repeat;
-    /* A imagem não vai se repetir */
     margin: 0;
-    /* Remover margens da tela */
     height: 100vh;
-    /* Garantir que o body ocupe toda a altura da tela */
+}
+
+.text {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 66vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.content {
+    height: 33vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+p {
+    font-size: 22px;
+    font-family: "Inter", serif;
+    font-weight: 600;
+    width: 440px;
+    background: none;
+    text-align: center;
 }
 
 button {
@@ -31,7 +55,7 @@ button {
     height: 80px;
     border-radius: 80px;
     margin-top: 40px;
-    margin-right: 440px;
+    margin-bottom: 150px;
     background: none;
     background: linear-gradient(#ec91d1, #940168);
     border: none;
@@ -61,18 +85,7 @@ button img {
     padding-left: 5px;
     background: none;
 }
-
-p {
-    font-size: 22px;
-    font-family: "Inter", serif;
-    font-weight: 600;
-    margin-top: 270px;
-    margin-right: 440px;
-    width: 440px;
-    background: none;
-    text-align: center;
-}
-
+ 
 
 @media (max-width: 600px) {
 
