@@ -5,214 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Macho Makeover</title>
-  <link rel="icon" href="images/diamante.png">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: #c950a0;
-      height: 100vh;
-    }
-
-    #characters,
-    #accessories {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .character,
-    .accessory {
-      width: 100px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    #avatarCanvas {
-      border: 2px dashed pink;
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    .canva {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .save {
-      width: 100%;
-      height: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .save button {
-      width: 100px;
-      height: 40px;
-      background-color: pink;
-    }
-
-    #accessories {
-      width: 100%;
-      flex-wrap: wrap;
-    }
-
-    #accessories button {
-      width: 180px;
-      height: 160px;
-    }
-
-    #accessories button img {
-      width: 180px;
-      height: 200px;
-    }
-
-    .carousel-container {
-      position: absolute;
-      top: 50%;
-      right: 20px;
-      transform: translateY(-50%);
-      width: 100%;
-      max-width: 500px;
-      height: 600px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: linear-gradient(135deg, #ce4595, #f2b2df);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .arrow {
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-      margin: 10px;
-      color: white;
-    }
-
-    .arrow:disabled {
-      color: #ccc;
-      cursor: not-allowed;
-    }
-
-    #saveAvatar img {
-      width: 50px;
-      height: 45px;
-      padding-top: 15px;
-      padding-left: 5px;
-      background: none;
-    }
-
-    .carousel {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      overflow: hidden;
-      height: 100%;
-      scroll-behavior: smooth;
-    }
-
-    .carousel-item {
-      width: 200px;
-      height: 150px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-    }
-
-    .carousel-item img {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-    }
-
-    .save button {
-      display: flex;
-      width: 290px;
-      height: 80px;
-      border-radius: 80px;
-      margin-top: 50px;
-      background: none;
-      background: linear-gradient(#ec91d1, #940168);
-      border: none;
-    }
-
-    a {
-      background: none;
-    }
-
-    h1 {
-      font-size: 20px;
-      background: none;
-      padding-top: 15px;
-      padding-left: 40px;
-    }
-
-    button img {
-      width: 50px;
-      padding-top: 15px;
-      padding-left: 15px;
-      background: none;
-    }
-
-    .alinhei {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 50%;
-      position: absolute;
-      left: 20px;
-    }
-
-    .tabs-container {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .tabs {
-      display: flex;
-      justify-content: center;
-    }
-
-    .tab {
-      padding: 10px 20px;
-      margin: 0 5px;
-      background-color: #ddd;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .tab.active {
-      background-color: #d64499;
-      color: white;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        display: flex;
-        flex-direction: column;
-      }
-    }
-  </style>
+    <link rel="stylesheet" href="src/css/monte.css">
+  <link rel="icon" href="src/images/diamante.png">
 </head>
 
 <body>
@@ -225,7 +19,7 @@
     <div class="save">
       <button id="saveAvatar">
         <h1>Salvar Avatar</h1>
-        <img src="images/diamante.png" alt="">
+        <img src="src/images/diamante.png" alt="">
       </button>
     </div>
   </div>
@@ -433,88 +227,88 @@
     const carousel = document.getElementById("carousel");
     const items = {
       cabelos: [
-        "images/cabelo1.png",
-        "images/cabelo2.png",
-        "images/cabelo3.png",
-        "images/cabelo4.png",
-        "images/cabelo5.png",
-        "images/cabelo6.png",
-        "images/cabelo7.png",
-        "images/cabelo8.png",
-        "images/cabelo9.png",
-        "images/cabelo10.png",
-        "images/cabelo11.png"
+        "src/images/cabelo1.png",
+        "src/images/cabelo2.png",
+        "src/images/cabelo3.png",
+        "src/images/cabelo4.png",
+        "src/images/cabelo5.png",
+        "src/images/cabelo6.png",
+        "src/images/cabelo7.png",
+        "src/images/cabelo8.png",
+        "src/images/cabelo9.png",
+        "src/images/cabelo10.png",
+        "src/images/cabelo11.png"
       ],
       oculos: [
-        "images/oculos1.png",
-        "images/oculos2.png",
-        "images/oculos3.png",
-        "images/oculos4.png",
-        "images/oculos5.png",
-        "images/oculos6.png",
-        "images/oculos7.png",
-        "images/oculos8.png",
-        "images/oculos9.png",
-        "images/oculos10.png",
-        "images/oculos11.png",
-        "images/oculos12.png"
+        "src/images/oculos1.png",
+        "src/images/oculos2.png",
+        "src/images/oculos3.png",
+        "src/images/oculos4.png",
+        "src/images/oculos5.png",
+        "src/images/oculos6.png",
+        "src/images/oculos7.png",
+        "src/images/oculos8.png",
+        "src/images/oculos9.png",
+        "src/images/oculos10.png",
+        "src/images/oculos11.png",
+        "src/images/oculos12.png"
       ],
       colares: [
-        "images/colar1.png",
-        "images/colar2.png",
-        "images/colar3.png",
-        "images/colar4.png",
-        "images/colar5.png",
-        "images/colar6.png",
-        "images/colar7.png",
-        "images/colar8.png",
-        "images/cachecol-rosa.png"
+        "src/images/colar1.png",
+        "src/images/colar2.png",
+        "src/images/colar3.png",
+        "src/images/colar4.png",
+        "src/images/colar5.png",
+        "src/images/colar6.png",
+        "src/images/colar7.png",
+        "src/images/colar8.png",
+        "src/images/cachecol-rosa.png"
       ],
       chapeus: [
-        "images/coroa8.png",
-        "images/coroa9.png",
-        "images/coroa10.png",
-        "images/coroa11.png",
-        "images/coroa12.png",
-        "images/coroa13.png",
-        "images/coroa1.png",
-        "images/coroa2.png",
-        "images/coroa3.png",
-        "images/coroa4.png",
-        "images/coroa5.png",
-        "images/coroa6.png",
-        "images/coroa7.png",
-        "images/coroa14.png",
-        "images/coroa15.png",
-        "images/boina.png"
+        "src/images/coroa8.png",
+        "src/images/coroa9.png",
+        "src/images/coroa10.png",
+        "src/images/coroa11.png",
+        "src/images/coroa12.png",
+        "src/images/coroa13.png",
+        "src/images/coroa1.png",
+        "src/images/coroa2.png",
+        "src/images/coroa3.png",
+        "src/images/coroa4.png",
+        "src/images/coroa5.png",
+        "src/images/coroa6.png",
+        "src/images/coroa7.png",
+        "src/images/coroa14.png",
+        "src/images/coroa15.png",
+        "src/images/boina.png"
       ],
       add: [
-        "images/add1.png",
-        "images/add2.png",
-        "images/add3.png",
-        "images/add4.png",
-        "images/add5.png",
-        "images/add6.png",
-        "images/add7.png",
-        "images/add8.png",
-        "images/add9.png",
-        "images/add10.png",
-        "images/add11.png",
-        "images/add12.png",
-        "images/laço-azul.png",
-        "images/laço-rosa.png",
-        "images/mini-bag-pink.png",
-        "images/bag-pink.png",
-        "images/bolsa1.png",
-        "images/bolsa2.png",
-        "images/bolsa3.png",
-        "images/bolsa4.png",
-        "images/bolsa5.png",
-        "images/bolsa6.png",
-        "images/bolsa7.png",
-        "images/bolsa8.png",
-        "images/bolsa9.png",
-        "images/bolsa10.png"
+        "src/images/add1.png",
+        "src/images/add2.png",
+        "src/images/add3.png",
+        "src/images/add4.png",
+        "src/images/add5.png",
+        "src/images/add6.png",
+        "src/images/add7.png",
+        "src/images/add8.png",
+        "src/images/add9.png",
+        "src/images/add10.png",
+        "src/images/add11.png",
+        "src/images/add12.png",
+        "src/images/laço-azul.png",
+        "src/images/laço-rosa.png",
+        "src/images/mini-bag-pink.png",
+        "src/images/bag-pink.png",
+        "src/images/bolsa1.png",
+        "src/images/bolsa2.png",
+        "src/images/bolsa3.png",
+        "src/images/bolsa4.png",
+        "src/images/bolsa5.png",
+        "src/images/bolsa6.png",
+        "src/images/bolsa7.png",
+        "src/images/bolsa8.png",
+        "src/images/bolsa9.png",
+        "src/images/bolsa10.png"
       ],
     };
 
