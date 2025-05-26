@@ -5,8 +5,168 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Macho Makeover</title>
-    <link rel="stylesheet" href="src/css/monte.css">
+  <link rel="stylesheet" href="src/css/monte.css">
   <link rel="icon" href="src/images/diamante.png">
+  <style>
+    .carousel::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .carousel::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    .carousel::-webkit-scrollbar-thumb {
+      background: rgba(212, 68, 153, 0.7);
+      border-radius: 10px;
+    }
+
+    .carousel::-webkit-scrollbar-thumb:hover {
+      background: #940168;
+    }
+
+    .carousel-item {
+      width: 200px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    .carousel-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    .alinhei {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 50%;
+      position: absolute;
+      left: 20px;
+    }
+
+    .tabs-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+    }
+
+    .layers-panel {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      background: rgba(236, 145, 209, 0.9);
+      padding: 10px;
+      border-radius: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      border: 2px solid #940168;
+      transition: all 0.3s ease;
+      width: 200px;
+    }
+    
+    .layers-panel.collapsed {
+      width: 40px;
+      height: 40px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    
+    .layers-panel.collapsed .panel-content {
+      display: none;
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: white;
+      font-weight: bold;
+      width: 100%;
+    }
+    
+    .layers-panel.collapsed .panel-header {
+      justify-content: center;
+      margin: 0;
+    }
+    
+    .layers-panel.collapsed .panel-title {
+      display: none;
+    }
+    
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 5px;
+      min-width: 20px;
+    }
+    
+    .layer-item {
+      padding: 8px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .layer-item:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .layer-item.selected {
+      background: rgba(212, 68, 153, 0.7);
+      color: white;
+    }
+    
+    .layer-controls button {
+      margin-left: 5px;
+      font-size: 12px;
+      background: #d64499;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 2px 5px;
+    }
+    
+    .layer-controls button:hover {
+      background: #940168;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -21,6 +181,16 @@
         <h1>Salvar Avatar</h1>
         <img src="src/images/diamante.png" alt="">
       </button>
+    </div>
+  </div>
+
+  <div class="layers-panel" id="layersPanel">
+    <div class="panel-header">
+      <span class="panel-title">Camadas</span>
+      <button class="toggle-btn" id="togglePanel">▼</button>
+    </div>
+    <div class="panel-content" id="panelContent">
+      <div id="layersList"></div>
     </div>
   </div>
 
@@ -40,372 +210,7 @@
     <div class="arrow" id="nextArrow">↓</div>
   </div>
 
-  <canvas id="canvas" width="400" height="400"></canvas>
-  <script>
-
-    document.getElementById("prevArrow").addEventListener("click", () => {
-      const carousel = document.getElementById("carousel");
-      carousel.scrollBy({
-        top: -carousel.clientHeight,
-        behavior: 'smooth'
-      });
-    });
-
-    document.getElementById("nextArrow").addEventListener("click", () => {
-      const carousel = document.getElementById("carousel");
-      carousel.scrollBy({
-        top: carousel.clientHeight,
-        behavior: 'smooth'
-      });
-    });
-    const selectedCharacter = localStorage.getItem('selectedCharacter');
-
-    let characterImage = null;
-
-    const accessoryImages = [];
-
-    let selectedAccessory = null;
-
-    let isDragging = false;
-
-    let resizing = null;
-
-    const canvas = document.getElementById("avatarCanvas");
-    const ctx = canvas.getContext("2d");
-
-    function drawCharacterAndAccessories() {
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-
-      const scaleX = canvasWidth / characterImage.width;
-      const scaleY = canvasHeight / characterImage.height;
-      const scale = Math.min(scaleX, scaleY);
-
-      const newWidth = characterImage.width * scale;
-      const newHeight = characterImage.height * scale;
-
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-      ctx.drawImage(
-        characterImage,
-        (canvasWidth - newWidth) / 2,
-        (canvasHeight - newHeight) / 2,
-        newWidth,
-        newHeight
-      );
-
-      accessoryImages.forEach(({ img, x, y, width, height }) => {
-        ctx.drawImage(img, x, y, width, height);
-
-        if (selectedAccessory && selectedAccessory.img === img) {
-          ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
-          const corners = [
-            { x: x - 5, y: y - 5 },
-            { x: x + width - 5, y: y - 5 },
-            { x: x - 5, y: y + height - 5 },
-            { x: x + width - 5, y: y + height - 5 },
-          ];
-          corners.forEach(({ x, y }) => ctx.fillRect(x, y, 10, 10));
-        }
-      });
-    }
-
-    function setCharacter(imageSrc) {
-      characterImage = new Image();
-      characterImage.src = imageSrc;
-
-      characterImage.onload = () => {
-        drawCharacterAndAccessories();
-      };
-    }
-
-    function addAccessory(imageSrc) {
-      const accessoryImage = new Image();
-      accessoryImage.src = imageSrc;
-
-      accessoryImage.onload = () => {
-        const width = 100;
-        const height = 100;
-        const x = (canvas.width - width) / 2;
-        const y = (canvas.height - height) / 2;
-
-        accessoryImages.push({ img: accessoryImage, x, y, width, height });
-        drawCharacterAndAccessories();
-      };
-    }
-
-    function detectCorner(x, y, acc) {
-      const cornerSize = 10;
-      const corners = [
-        { name: "top-left", x: acc.x, y: acc.y },
-        { name: "top-right", x: acc.x + acc.width, y: acc.y },
-        { name: "bottom-left", x: acc.x, y: acc.y + acc.height },
-        { name: "bottom-right", x: acc.x + acc.width, y: acc.y + acc.height },
-      ];
-      return corners.find(
-        (corner) =>
-          x >= corner.x - cornerSize &&
-          x <= corner.x + cornerSize &&
-          y >= corner.y - cornerSize &&
-          y <= corner.y + cornerSize
-      );
-    }
-
-    canvas.addEventListener("mousedown", (event) => {
-      const { offsetX, offsetY } = event;
-
-      selectedAccessory = accessoryImages.find(
-        ({ x, y, width, height }) =>
-          offsetX >= x && offsetX <= x + width && offsetY >= y && offsetY <= y + height
-      );
-
-      if (selectedAccessory) {
-        isDragging = true;
-      }
-
-      resizing = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
-      if (resizing) {
-        isDragging = true;
-      }
-
-      drawCharacterAndAccessories();
-    });
-
-    canvas.addEventListener("mousemove", (event) => {
-      if (isDragging && selectedAccessory) {
-        const { offsetX, offsetY } = event;
-
-        if (resizing) {
-          if (resizing.name === "top-left") {
-            selectedAccessory.width += selectedAccessory.x - offsetX;
-            selectedAccessory.height += selectedAccessory.y - offsetY;
-            selectedAccessory.x = offsetX;
-            selectedAccessory.y = offsetY;
-          } else if (resizing.name === "top-right") {
-            selectedAccessory.width = offsetX - selectedAccessory.x;
-            selectedAccessory.height += selectedAccessory.y - offsetY;
-            selectedAccessory.y = offsetY;
-          } else if (resizing.name === "bottom-left") {
-            selectedAccessory.width += selectedAccessory.x - offsetX;
-            selectedAccessory.height = offsetY - selectedAccessory.y;
-            selectedAccessory.x = offsetX;
-          } else if (resizing.name === "bottom-right") {
-            selectedAccessory.width = offsetX - selectedAccessory.x;
-            selectedAccessory.height = offsetY - selectedAccessory.y;
-          }
-        } else {
-          selectedAccessory.x = offsetX - selectedAccessory.width / 2;
-          selectedAccessory.y = offsetY - selectedAccessory.height / 2;
-        }
-
-        drawCharacterAndAccessories();
-      }
-    });
-
-    canvas.addEventListener("mouseup", () => {
-      isDragging = false;
-      resizing = null;
-    });
-
-    const saveButton = document.getElementById("saveAvatar");
-    saveButton.addEventListener("click", () => {
-      const image = canvas.toDataURL("image/png");
-
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = "macho.png";
-      link.click();
-    });
-
-    if (selectedCharacter) {
-      setCharacter(selectedCharacter);
-    } else {
-      alert('Nenhum personagem foi selecionado!');
-    }
-
-    const tabs = document.querySelectorAll(".tab");
-    const carousel = document.getElementById("carousel");
-    const items = {
-      cabelos: [
-        "src/images/cabelo1.png",
-        "src/images/cabelo2.png",
-        "src/images/cabelo3.png",
-        "src/images/cabelo4.png",
-        "src/images/cabelo5.png",
-        "src/images/cabelo6.png",
-        "src/images/cabelo7.png",
-        "src/images/cabelo8.png",
-        "src/images/cabelo9.png",
-        "src/images/cabelo10.png",
-        "src/images/cabelo11.png"
-      ],
-      oculos: [
-        "src/images/oculos1.png",
-        "src/images/oculos2.png",
-        "src/images/oculos3.png",
-        "src/images/oculos4.png",
-        "src/images/oculos5.png",
-        "src/images/oculos6.png",
-        "src/images/oculos7.png",
-        "src/images/oculos8.png",
-        "src/images/oculos9.png",
-        "src/images/oculos10.png",
-        "src/images/oculos11.png",
-        "src/images/oculos12.png"
-      ],
-      colares: [
-        "src/images/colar1.png",
-        "src/images/colar2.png",
-        "src/images/colar3.png",
-        "src/images/colar4.png",
-        "src/images/colar5.png",
-        "src/images/colar6.png",
-        "src/images/colar7.png",
-        "src/images/colar8.png",
-        "src/images/cachecol-rosa.png"
-      ],
-      chapeus: [
-        "src/images/coroa8.png",
-        "src/images/coroa9.png",
-        "src/images/coroa10.png",
-        "src/images/coroa11.png",
-        "src/images/coroa12.png",
-        "src/images/coroa13.png",
-        "src/images/coroa1.png",
-        "src/images/coroa2.png",
-        "src/images/coroa3.png",
-        "src/images/coroa4.png",
-        "src/images/coroa5.png",
-        "src/images/coroa6.png",
-        "src/images/coroa7.png",
-        "src/images/coroa14.png",
-        "src/images/coroa15.png",
-        "src/images/boina.png"
-      ],
-      add: [
-        "src/images/add1.png",
-        "src/images/add2.png",
-        "src/images/add3.png",
-        "src/images/add4.png",
-        "src/images/add5.png",
-        "src/images/add6.png",
-        "src/images/add7.png",
-        "src/images/add8.png",
-        "src/images/add9.png",
-        "src/images/add10.png",
-        "src/images/add11.png",
-        "src/images/add12.png",
-        "src/images/laço-azul.png",
-        "src/images/laço-rosa.png",
-        "src/images/mini-bag-pink.png",
-        "src/images/bag-pink.png",
-        "src/images/bolsa1.png",
-        "src/images/bolsa2.png",
-        "src/images/bolsa3.png",
-        "src/images/bolsa4.png",
-        "src/images/bolsa5.png",
-        "src/images/bolsa6.png",
-        "src/images/bolsa7.png",
-        "src/images/bolsa8.png",
-        "src/images/bolsa9.png",
-        "src/images/bolsa10.png"
-      ],
-    };
-
-    let currentIndex = 0;
-    function renderItems(category) {
-      const categoryItems = items[category];
-      carousel.innerHTML = "";
-      categoryItems.forEach((imageSrc) => {
-        const item = document.createElement("div");
-        item.classList.add("carousel-item");
-        const img = document.createElement("img");
-        img.src = imageSrc;
-        img.alt = "Acessório";
-        item.appendChild(img);
-        item.addEventListener("click", () => {
-          addAccessory(imageSrc);
-        });
-        carousel.appendChild(item);
-      });
-    }
-    function updateTabs() {
-      tabs.forEach((tab, index) => {
-        tab.classList.toggle("active", index === currentIndex);
-      });
-      const category = tabs[currentIndex].dataset.category;
-      renderItems(category);
-    }
-    tabs.forEach((tab, index) => {
-      tab.addEventListener("click", () => {
-        currentIndex = index;
-        updateTabs();
-      });
-    });
-    updateTabs();
-    canvas.addEventListener("mousedown", (event) => {
-      const { offsetX, offsetY } = event;
-      selectedAccessory = accessoryImages.find((acc) => detectCorner(offsetX, offsetY, acc));
-      if (selectedAccessory) {
-        resizing = detectCorner(offsetX, offsetY, selectedAccessory).name;
-        isDragging = true;
-        return;
-      }
-      selectedAccessory = accessoryImages.find(
-        ({ x, y, width, height }) =>
-          offsetX >= x && offsetX <= x + width && offsetY >= y && offsetY <= y + height
-      );
-      if (selectedAccessory) {
-        isDragging = true;
-      }
-      drawAquaman();
-    });
-    canvas.addEventListener("mousemove", (event) => {
-      if (isDragging && selectedAccessory) {
-        const { offsetX, offsetY } = event;
-
-        if (resizing) {
-          if (resizing === "top-left") {
-            selectedAccessory.width += selectedAccessory.x - offsetX;
-            selectedAccessory.height += selectedAccessory.y - offsetY;
-            selectedAccessory.x = offsetX;
-            selectedAccessory.y = offsetY;
-          } else if (resizing === "top-right") {
-            selectedAccessory.width = offsetX - selectedAccessory.x;
-            selectedAccessory.height += selectedAccessory.y - offsetY;
-            selectedAccessory.y = offsetY;
-          } else if (resizing === "bottom-left") {
-            selectedAccessory.width += selectedAccessory.x - offsetX;
-            selectedAccessory.height = offsetY - selectedAccessory.y;
-            selectedAccessory.x = offsetX;
-          } else if (resizing === "bottom-right") {
-            selectedAccessory.width = offsetX - selectedAccessory.x;
-            selectedAccessory.height = offsetY - selectedAccessory.y;
-          }
-        } else {
-          selectedAccessory.x = offsetX - selectedAccessory.width / 2;
-          selectedAccessory.y = offsetY - selectedAccessory.height / 2;
-        }
-        drawAquaman();
-      }
-    });
-    canvas.addEventListener("mouseup", () => {
-      isDragging = false;
-      resizing = null;
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Delete" && selectedAccessory) {
-        const index = accessoryImages.findIndex(
-          (accessory) => accessory.img === selectedAccessory.img
-        );
-        if (index !== -1) {
-          accessoryImages.splice(index, 1);
-          selectedAccessory = null;
-          drawCharacterAndAccessories();
-        }
-      }
-    });
-  </script>
+  <script src="src/js/monte.js"></script>
 </body>
 
 </html>
