@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Macho Makeover</title>
     <link rel="stylesheet" href="src/css/carrossel.css">
-  <link rel="icon" href="src/images/diamante.png" />
+    <link rel="icon" href="src/images/diamante.png">
 </head>
 
 <body>
@@ -19,30 +18,39 @@
     </div>
   </div>
 
-  <div class="carousel">
-    <div class="carousel-track">
-      <div class="carousel-item"><img src="src/images/aquaman_base.png" alt="Aquaman"></div>
-      <div class="carousel-item"><img src="src/images/the_rock_base.png" alt="The Rock"></div>
-      <div class="carousel-item"><img src="src/images/capitao-america.png" alt="Capitão América"></div>
-      <div class="carousel-item"><img src="src/images/capitao-nasc.png" alt="Capitão Nascimento"></div>
-      <div class="carousel-item"><img src="src/images/george-weasley.png" alt="George"></div>
-      <div class="carousel-item"><img src="src/images/dean-winchester.png" alt="Dean"></div>
-      <div class="carousel-item"><img src="src/images/anthony-brigerton.png" alt="Anthony"></div>
-      <div class="carousel-item"><img src="src/images/thor_base.png" alt="Thor"></div>
-    </div>
-    <div class="carousel-controls">
-      <button class="carousel-button" id="prev">&#8249;</button>
-      <button class="carousel-button" id="next">&#8250;</button>
+  <div class="categories-page" id="categories-page">
+    <div class="categories">
+      <button class="category-btn" data-category="action">Filmes de Ação</button>
+      <button class="category-btn" data-category="superheroes">Super-Heróis</button>
+      <button class="category-btn" data-category="leadingmen">Galãs do Cinema</button>
+      <button class="category-btn" data-category="games">Personagens de Jogos</button>
+      <button class="category-btn" data-category="singers">Cantores/Ícones da Música</button>
+      <button class="category-btn" data-category="series">Personagens de Séries</button>
     </div>
   </div>
 
-  <div class="botao">
-    <button id="confirmar-btn">
-      <span class="btn-text">
-        <h1>Confirmar</h1>
-      </span>
-      <img src="src/images/diamante.png" alt="Ícone" />
+  <div class="carousel-page" id="carousel-page">
+    <button class="back-button" id="back-button">
+      &#8592; Voltar
     </button>
+    <h2 class="category-title" id="category-title"></h2>
+    
+    <div class="carousel">
+      <div class="carousel-track" id="carousel-track"></div>
+      <div class="carousel-controls">
+        <button class="carousel-button" id="prev">&#8249;</button>
+        <button class="carousel-button" id="next">&#8250;</button>
+      </div>
+    </div>
+
+    <div class="botao">
+      <button id="confirmar-btn">
+        <span class="btn-text">
+          <h1>Confirmar</h1>
+        </span>
+        <img src="src/images/diamante.png" alt="Ícone" />
+      </button>
+    </div>
   </div>
 
   <div id="custom-alert">
@@ -54,5 +62,4 @@
 
   <script src="src/js/carrossel.js"></script>
 </body>
-
 </html>
