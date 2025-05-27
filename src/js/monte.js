@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.beginPath();
         ctx.arc(0, rotationHandleY + 10, 15, Math.PI * 1.25, Math.PI * 1.75, false);
         ctx.strokeStyle = "rgba(212, 68, 153, 0.8)";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 10;
         ctx.stroke();
         
         ctx.beginPath();
@@ -518,10 +518,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const items = {
     cabelos: Array.from({ length: 50 }, (_, i) => `src/images/cabelos/cabelo${i + 1}.png`),
-    oculos: Array.from({ length: 40 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
+    oculos: Array.from({ length: 50 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
     colares: [
-      ...Array.from({ length: 8 }, (_, i) => `src/images/colares/colar${i + 1}.png`),
-      ...Array.from({ length: 9 }, (_, i) => `src/images/colares/brinco${i + 1}.png`)
+      ...Array.from({ length: 40 }, (_, i) => `src/images/colares/colar${i + 1}.png`),
+      ...Array.from({ length: 11 }, (_, i) => `src/images/colares/brinco${i + 1}.png`)
     ],
     chapeus: [
       ...Array.from({ length: 16 }, (_, i) => `src/images/chapeus/chapeu${i + 1}.png`)
