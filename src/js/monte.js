@@ -524,10 +524,10 @@ document.addEventListener("DOMContentLoaded", function() {
       ...Array.from({ length: 11 }, (_, i) => `src/images/colares/brinco${i + 1}.png`)
     ],
     chapeus: [
-      ...Array.from({ length: 16 }, (_, i) => `src/images/chapeus/chapeu${i + 1}.png`)
+      ...Array.from({ length: 50 }, (_, i) => `src/images/chapeus/chapeu${i + 1}.png`)
     ],
     add: [
-      ...Array.from({ length: 10 }, (_, i) => `src/images/adds/add${i + 1}.png`),
+      ...Array.from({ length: 31 }, (_, i) => `src/images/adds/add${i + 1}.png`),
       ...Array.from({ length: 10 }, (_, i) => `src/images/adds/bolsa${i + 1}.png`)
     ]
   };
