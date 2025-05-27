@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (src.includes('cabelos')) return 'Cabelo';
     if (src.includes('oculos')) return 'Óculos';
     if (src.includes('colares') || src.includes('brinco')) return 'Colar/Brinco';
-    if (src.includes('coroas')) return 'Chapéu/Coroa';
+    if (src.includes('chapeus')) return 'Chapéu';
     if (src.includes('adds') || src.includes('bolsa')) return 'Acessório';
     return 'Item';
   }
@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.lineWidth = 2;
         ctx.strokeRect(-width / 2, -height / 2, width, height);
         
-        ctx.fillStyle = "rgba(212, 68, 153, 0.8)";
+        ctx.fillStyle = "rgba(143, 28, 85, 0.8)";
         
         const handleSize = 8;
         const cornerHandles = [
@@ -517,17 +517,17 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   const items = {
-    cabelos: Array.from({ length: 32 }, (_, i) => `src/images/cabelos/cabelo${i + 1}.png`),
-    oculos: Array.from({ length: 12 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
+    cabelos: Array.from({ length: 50 }, (_, i) => `src/images/cabelos/cabelo${i + 1}.png`),
+    oculos: Array.from({ length: 40 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
     colares: [
       ...Array.from({ length: 8 }, (_, i) => `src/images/colares/colar${i + 1}.png`),
       ...Array.from({ length: 9 }, (_, i) => `src/images/colares/brinco${i + 1}.png`)
     ],
     chapeus: [
-      ...Array.from({ length: 15 }, (_, i) => `src/images/coroas/coroa${i + 1}.png`)
+      ...Array.from({ length: 16 }, (_, i) => `src/images/chapeus/chapeu${i + 1}.png`)
     ],
     add: [
-      ...Array.from({ length: 14 }, (_, i) => `src/images/adds/add${i + 1}.png`),
+      ...Array.from({ length: 10 }, (_, i) => `src/images/adds/add${i + 1}.png`),
       ...Array.from({ length: 10 }, (_, i) => `src/images/adds/bolsa${i + 1}.png`)
     ]
   };
