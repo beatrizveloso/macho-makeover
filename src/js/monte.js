@@ -16,8 +16,20 @@ document.addEventListener("DOMContentLoaded", function() {
   let selectedAccessory = null;
   let isDragging = false;
   let resizing = null;
+  let rotating = false;
   let panelCollapsed = false;
   let currentIndex = 0;
+  let dragStartX, dragStartY;
+  let initialWidth, initialHeight;
+  let initialAngle = 0;
+  let initialMouseAngle = 0;
+
+  function checkArrowsVisibility() {
+    prevArrow.style.visibility = carousel.scrollTop > 0 ? 'visible' : 'hidden';
+    nextArrow.style.visibility = carousel.scrollTop < carousel.scrollHeight - carousel.clientHeight ? 'visible' : 'hidden';
+  }
+
+  carousel.addEventListener("scroll", checkArrowsVisibility);
 
   carousel.addEventListener("wheel", (event) => {
     event.preventDefault();
@@ -25,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
       top: event.deltaY,
       behavior: "smooth"
     });
+    setTimeout(checkArrowsVisibility, 100);
   });
 
   let isDraggingCarousel = false;
@@ -47,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   carousel.addEventListener('touchend', () => {
     isDraggingCarousel = false;
+    checkArrowsVisibility();
   });
 
   prevArrow.addEventListener("click", () => {
@@ -54,6 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
       top: -carousel.clientHeight,
       behavior: 'smooth'
     });
+    setTimeout(checkArrowsVisibility, 100);
   });
 
   nextArrow.addEventListener("click", () => {
@@ -61,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
       top: carousel.clientHeight,
       behavior: 'smooth'
     });
+    setTimeout(checkArrowsVisibility, 100);
   });
 
   togglePanelBtn.addEventListener('click', (e) => {
@@ -91,7 +107,8 @@ document.addEventListener("DOMContentLoaded", function() {
         layerItem.classList.add('selected');
       }
       
-      layerItem.textContent = `Acessório ${accessoryImages.length - i}`;
+      const category = getCategoryFromImageSrc(accessory.img.src);
+      layerItem.textContent = `${category} ${accessoryImages.length - i}`;
       
       const layerControls = document.createElement('div');
       layerControls.className = 'layer-controls';
@@ -145,6 +162,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  function getCategoryFromImageSrc(src) {
+    if (src.includes('cabelos')) return 'Cabelo';
+    if (src.includes('oculos')) return 'Óculos';
+    if (src.includes('colares') || src.includes('brinco')) return 'Colar/Brinco';
+    if (src.includes('coroas')) return 'Chapéu/Coroa';
+    if (src.includes('adds') || src.includes('bolsa')) return 'Acessório';
+    return 'Item';
+  }
+
   function drawCharacterAndAccessories() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -165,22 +191,53 @@ document.addEventListener("DOMContentLoaded", function() {
       );
     }
 
-    accessoryImages.forEach(({ img, x, y, width, height }) => {
-      ctx.drawImage(img, x, y, width, height);
-
+    accessoryImages.forEach(({ img, x, y, width, height, angle = 0 }) => {
+      ctx.save();
+      ctx.translate(x + width / 2, y + height / 2);
+      ctx.rotate(angle * Math.PI / 180);
+      ctx.drawImage(img, -width / 2, -height / 2, width, height);
+      
       if (selectedAccessory && selectedAccessory.img === img) {
         ctx.strokeStyle = "rgba(148, 1, 104, 0.8)";
         ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
+        ctx.strokeRect(-width / 2, -height / 2, width, height);
         
-        ctx.fillStyle = "rgba(212, 68, 153, 0.5)";
-        [[x-5,y-5], [x+width-5,y-5], [x-5,y+height-5], [x+width-5,y+height-5]].forEach(
-          ([x, y]) => ctx.fillRect(x, y, 10, 10)
-        );
+        ctx.fillStyle = "rgba(212, 68, 153, 0.8)";
+        
+        const handleSize = 8;
+        const cornerHandles = [
+          { x: -width/2, y: -height/2 },      
+          { x: width/2, y: -height/2 },       
+          { x: -width/2, y: height/2 },      
+          { x: width/2, y: height/2 }       
+        ];
+        
+        cornerHandles.forEach(({x, y}) => {
+          ctx.beginPath();
+          ctx.arc(x, y, handleSize, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        
+        const rotationHandleY = -height/2 - 25;
+        
+        ctx.beginPath();
+        ctx.arc(0, rotationHandleY + 10, 15, Math.PI * 1.25, Math.PI * 1.75, false);
+        ctx.strokeStyle = "rgba(212, 68, 153, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(0, rotationHandleY - 5);
+        ctx.lineTo(-5, rotationHandleY);
+        ctx.lineTo(5, rotationHandleY);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(212, 68, 153, 0.8)";
+        ctx.fill();
       }
+      ctx.restore();
     });
   }
-
+  
   function setCharacter(imageSrc) {
     characterImage = new Image();
     characterImage.src = imageSrc;
@@ -189,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function() {
       updateLayersPanel();
     };
   }
-
+  
   function addAccessory(imageSrc) {
     const img = new Image();
     img.src = imageSrc;
@@ -199,7 +256,8 @@ document.addEventListener("DOMContentLoaded", function() {
         x: (canvas.width - 100) / 2,
         y: (canvas.height - 100) / 2,
         width: 100,
-        height: 100
+        height: 100,
+        angle: 0
       };
       accessoryImages.push(newAccessory);
       selectedAccessory = newAccessory;
@@ -217,28 +275,58 @@ document.addEventListener("DOMContentLoaded", function() {
   function getAccessoryAtPosition(x, y) {
     for (let i = accessoryImages.length - 1; i >= 0; i--) {
       const acc = accessoryImages[i];
-      if (x >= acc.x && x <= acc.x + acc.width && 
-          y >= acc.y && y <= acc.y + acc.height) {
+      const centerX = acc.x + acc.width / 2;
+      const centerY = acc.y + acc.height / 2;
+      
+      const angle = -acc.angle * Math.PI / 180;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      
+      const localX = (x - centerX) * cos - (y - centerY) * sin;
+      const localY = (x - centerX) * sin + (y - centerY) * cos;
+      
+      if (localX >= -acc.width/2 && localX <= acc.width/2 && 
+          localY >= -acc.height/2 && localY <= acc.height/2) {
         return acc;
       }
     }
     return null;
   }
 
-  function detectCorner(x, y, acc) {
-    const cornerSize = 10;
-    const corners = [
-      { name: "top-left", x: acc.x, y: acc.y },
-      { name: "top-right", x: acc.x + acc.width, y: acc.y },
-      { name: "bottom-left", x: acc.x, y: acc.y + acc.height },
-      { name: "bottom-right", x: acc.x + acc.width, y: acc.y + acc.height }
+  function detectControl(x, y, acc) {
+    const centerX = acc.x + acc.width / 2;
+    const centerY = acc.y + acc.height / 2;
+    const angle = -acc.angle * Math.PI / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    
+    const localX = (x - centerX) * cos - (y - centerY) * sin;
+    const localY = (x - centerX) * sin + (y - centerY) * cos;
+  
+    const handleSize = 8;
+    const cornerHandles = [
+      { name: "top-left", x: -acc.width/2, y: -acc.height/2 },
+      { name: "top-right", x: acc.width/2, y: -acc.height/2 },
+      { name: "bottom-left", x: -acc.width/2, y: acc.height/2 },
+      { name: "bottom-right", x: acc.width/2, y: acc.height/2 }
     ];
-    return corners.find(corner =>
-      x >= corner.x - cornerSize &&
-      x <= corner.x + cornerSize &&
-      y >= corner.y - cornerSize &&
-      y <= corner.y + cornerSize
-    );
+    
+    for (const handle of cornerHandles) {
+      const dx = localX - handle.x;
+      const dy = localY - handle.y;
+      if (Math.sqrt(dx * dx + dy * dy) <= handleSize) {
+        return { name: handle.name };
+      }
+    }
+    
+    const rotationHandleY = -acc.height/2 - 25;
+    const dx = localX - 0;
+    const dy = localY - rotationHandleY;
+    if (Math.sqrt(dx * dx + dy * dy) <= 15) {
+      return { name: "rotate" };
+    }
+    
+    return null;
   }
 
   function handleCanvasMouseDown(event) {
@@ -248,67 +336,153 @@ document.addEventListener("DOMContentLoaded", function() {
     
     const clickedAccessory = getAccessoryAtPosition(offsetX, offsetY);
     if (clickedAccessory) {
-      const corner = detectCorner(offsetX, offsetY, clickedAccessory);
-      if (corner) {
+      const control = detectControl(offsetX, offsetY, clickedAccessory);
+      if (control) {
         selectedAccessory = clickedAccessory;
-        resizing = corner.name;
-        isDragging = true;
+        if (control.name === "rotate") {
+          rotating = true;
+          dragStartX = offsetX;
+          dragStartY = offsetY;
+          initialAngle = selectedAccessory.angle;
+          
+          const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+          const centerY = selectedAccessory.y + selectedAccessory.height / 2;
+          initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
+        } else {
+          resizing = control.name;
+          isDragging = true;
+          dragStartX = offsetX;
+          dragStartY = offsetY;
+          initialWidth = selectedAccessory.width;
+          initialHeight = selectedAccessory.height;
+        }
+        drawCharacterAndAccessories();
         return;
       }
     }
     
     selectedAccessory = clickedAccessory;
-    if (selectedAccessory) isDragging = true;
+    if (selectedAccessory) {
+      isDragging = true;
+      dragStartX = offsetX;
+      dragStartY = offsetY;
+      const initialX = selectedAccessory.x;
+      const initialY = selectedAccessory.y;
+      
+      canvas.addEventListener("mousemove", function moveHandler(e) {
+        if (!isDragging) {
+          canvas.removeEventListener("mousemove", moveHandler);
+          return;
+        }
+        
+        const rect = canvas.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        
+        selectedAccessory.x = initialX + (offsetX - dragStartX);
+        selectedAccessory.y = initialY + (offsetY - dragStartY);
+        drawCharacterAndAccessories();
+      });
+    }
     
     drawCharacterAndAccessories();
     updateLayersPanel();
   }
 
   function handleCanvasMouseMove(event) {
-    if (isDragging && selectedAccessory) {
-      const rect = canvas.getBoundingClientRect();
-      const offsetX = event.clientX - rect.left;
-      const offsetY = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+    
+    if (rotating && selectedAccessory) {
+      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
+      
+      const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
+      selectedAccessory.angle = initialAngle + (newMouseAngle - initialMouseAngle);
+      
+      drawCharacterAndAccessories();
+      return;
+    }
+    
+    if (isDragging && selectedAccessory && resizing) {
+      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
+      
+      const angle = -selectedAccessory.angle * Math.PI / 180;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      
+      const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
+      const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
+      
+      const startLocalX = (dragStartX - centerX) * cos - (dragStartY - centerY) * sin;
+      const startLocalY = (dragStartX - centerX) * sin + (dragStartY - centerY) * cos;
+      
+      let newWidth = initialWidth;
+      let newHeight = initialHeight;
+      let deltaX = 0;
+      let deltaY = 0;
 
-      if (resizing) {
-        switch(resizing) {
-          case "top-left":
-            selectedAccessory.width += selectedAccessory.x - offsetX;
-            selectedAccessory.height += selectedAccessory.y - offsetY;
-            selectedAccessory.x = offsetX;
-            selectedAccessory.y = offsetY;
-            break;
-          case "top-right":
-            selectedAccessory.width = offsetX - selectedAccessory.x;
-            selectedAccessory.height += selectedAccessory.y - offsetY;
-            selectedAccessory.y = offsetY;
-            break;
-          case "bottom-left":
-            selectedAccessory.width += selectedAccessory.x - offsetX;
-            selectedAccessory.height = offsetY - selectedAccessory.y;
-            selectedAccessory.x = offsetX;
-            break;
-          case "bottom-right":
-            selectedAccessory.width = offsetX - selectedAccessory.x;
-            selectedAccessory.height = offsetY - selectedAccessory.y;
-            break;
-        }
-      } else {
-        selectedAccessory.x = offsetX - selectedAccessory.width / 2;
-        selectedAccessory.y = offsetY - selectedAccessory.height / 2;
+      switch(resizing) {
+        case "top-left":
+          newWidth = initialWidth - (localX - startLocalX) * 2;
+          newHeight = initialHeight - (localY - startLocalY) * 2;
+          deltaX = (localX - startLocalX);
+          deltaY = (localY - startLocalY);
+          break;
+        case "top-right":
+          newWidth = initialWidth + (localX - startLocalX) * 2;
+          newHeight = initialHeight - (localY - startLocalY) * 2;
+          deltaY = (localY - startLocalY);
+          break;
+        case "bottom-left":
+          newWidth = initialWidth - (localX - startLocalX) * 2;
+          newHeight = initialHeight + (localY - startLocalY) * 2;
+          deltaX = (localX - startLocalX);
+          break;
+        case "bottom-right":
+          newWidth = initialWidth + (localX - startLocalX) * 2;
+          newHeight = initialHeight + (localY - startLocalY) * 2;
+          break;
       }
-
+      
+      newWidth = Math.max(30, Math.min(800, newWidth));
+      newHeight = Math.max(30, Math.min(800, newHeight));
+      
+      if (event.shiftKey) {
+        const aspect = initialWidth / initialHeight;
+        if (resizing.includes("left") || resizing.includes("right")) {
+          newHeight = newWidth / aspect;
+        } else {
+          newWidth = newHeight * aspect;
+        }
+      }
+      
+      const widthRatio = newWidth / selectedAccessory.width;
+      const heightRatio = newHeight / selectedAccessory.height;
+      
+      selectedAccessory.x = centerX - (centerX - selectedAccessory.x) * widthRatio;
+      selectedAccessory.y = centerY - (centerY - selectedAccessory.y) * heightRatio;
+      
+      selectedAccessory.width = newWidth;
+      selectedAccessory.height = newHeight;
+      
       drawCharacterAndAccessories();
     }
   }
 
-  canvas.addEventListener("mousedown", handleCanvasMouseDown);
-  canvas.addEventListener("mousemove", handleCanvasMouseMove);
-  canvas.addEventListener("mouseup", () => {
+  function handleCanvasMouseUp() {
     isDragging = false;
     resizing = null;
+    rotating = false;
     updateLayersPanel();
-  });
+  }
+
+  canvas.addEventListener("mousedown", handleCanvasMouseDown);
+  canvas.addEventListener("mousemove", handleCanvasMouseMove);
+  canvas.addEventListener("mouseup", handleCanvasMouseUp);
+  canvas.addEventListener("mouseleave", handleCanvasMouseUp);
 
   canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -343,21 +517,18 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   const items = {
-    cabelos: Array.from({length: 11}, (_, i) => `src/images/cabelo${i+1}.png`),
-    oculos: Array.from({length: 12}, (_, i) => `src/images/oculos${i+1}.png`),
+    cabelos: Array.from({ length: 32 }, (_, i) => `src/images/cabelos/cabelo${i + 1}.png`),
+    oculos: Array.from({ length: 12 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
     colares: [
-      ...Array.from({length: 8}, (_, i) => `src/images/colar${i+1}.png`),
-      "src/images/cachecol-rosa.png"
+      ...Array.from({ length: 8 }, (_, i) => `src/images/colares/colar${i + 1}.png`),
+      ...Array.from({ length: 9 }, (_, i) => `src/images/colares/brinco${i + 1}.png`)
     ],
     chapeus: [
-      ...Array.from({length: 15}, (_, i) => `src/images/coroa${i+1}.png`).filter((_, i) => i !== 6),
-      "src/images/boina.png"
+      ...Array.from({ length: 15 }, (_, i) => `src/images/coroas/coroa${i + 1}.png`)
     ],
     add: [
-      ...Array.from({length: 12}, (_, i) => `src/images/add${i+1}.png`),
-      "src/images/laço-azul.png", "src/images/laço-rosa.png",
-      "src/images/mini-bag-pink.png", "src/images/bag-pink.png",
-      ...Array.from({length: 10}, (_, i) => `src/images/bolsa${i+1}.png`)
+      ...Array.from({ length: 14 }, (_, i) => `src/images/adds/add${i + 1}.png`),
+      ...Array.from({ length: 10 }, (_, i) => `src/images/adds/bolsa${i + 1}.png`)
     ]
   };
 
@@ -367,6 +538,7 @@ document.addEventListener("DOMContentLoaded", function() {
         <img src="${imageSrc}" alt="Acessório" onclick="addAccessory('${imageSrc}')">
       </div>
     `).join('');
+    checkArrowsVisibility();
   }
 
   function updateTabs() {
@@ -399,6 +571,21 @@ document.addEventListener("DOMContentLoaded", function() {
         selectedAccessory = null;
         drawCharacterAndAccessories();
         updateLayersPanel();
+      }
+    }
+    
+    if (selectedAccessory) {
+      const rotationStep = event.shiftKey ? 1 : 5;
+      
+      if (event.key === "ArrowLeft") {
+        selectedAccessory.angle -= rotationStep;
+        drawCharacterAndAccessories();
+      } else if (event.key === "ArrowRight") {
+        selectedAccessory.angle += rotationStep;
+        drawCharacterAndAccessories();
+      } else if (event.key === "r" || event.key === "R") {
+        selectedAccessory.angle = 0;
+        drawCharacterAndAccessories();
       }
     }
   });

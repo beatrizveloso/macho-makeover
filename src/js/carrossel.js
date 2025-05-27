@@ -3,81 +3,124 @@
       action: {
     title: "Filmes de Ação",
     items: [
-      { src: "src/images/capitao-nasc.png", alt: "Capitão Nascimento" },
-      { src: "src/images/rambo.png", alt: "Rambo" },
-      { src: "src/images/john_wick.png", alt: "John Wick" },
-      { src: "src/images/dom-toretto.png", alt: "Dom Toretto" },
-      { src: "src/images/ethan-hunt.png", alt: "Ethan Hunt" },
-      { src: "src/images/jack-reacher.png", alt: "Jack Reacher" },
-      { src: "src/images/mad-max.png", alt: "Max Rockatansky" },
-      { src: "src/images/the_rock_base.png", alt: "The Rock" }
+      { src: "src/images/personagens/capitao-nasc.png", alt: "Capitão Nascimento" },
+      { src: "src/images/personagens/rambo.png", alt: "Rambo" },
+      { src: "src/images/personagens/john_wick.png", alt: "John Wick" },
+      { src: "src/images/personagens/dom-toretto.png", alt: "Dom Toretto" },
+      { src: "src/images/personagens/ethan-hunt.png", alt: "Ethan Hunt" },
+      { src: "src/images/personagens/jack-reacher.png", alt: "Jack Reacher" },
+      { src: "src/images/personagens/mad-max.png", alt: "Max Rockatansky" },
+      { src: "src/images/personagens/the_rock_base.png", alt: "The Rock" }
     ]
   },
   superheroes: {
     title: "Super-Heróis",
     items: [
-      { src: "src/images/batman.png", alt: "Batman" },
-      { src: "src/images/thor_base.png", alt: "Thor" },
-      { src: "src/images/capitao-america.png", alt: "Capitão América" },
-      { src: "src/images/homem-de-ferro.png", alt: "Homem de Ferro" },
-      { src: "src/images/homem-aranha.png", alt: "Homem-Aranha" },
-      { src: "src/images/superman.png", alt: "Superman" },
-      { src: "src/images/deadpool.png", alt: "Deadpool" },
-      { src: "src/images/pantera-negra.png", alt: "Pantera Negra" }
+      { src: "src/images/personagens/batman.png", alt: "Batman" },
+      { src: "src/images/personagens/thor_base.png", alt: "Thor" },
+      { src: "src/images/personagens/capitao-america.png", alt: "Capitão América" },
+      { src: "src/images/personagens/homem-de-ferro.png", alt: "Homem de Ferro" },
+      { src: "src/images/personagens/homem-aranha.png", alt: "Homem-Aranha" },
+      { src: "src/images/personagens/superman.png", alt: "Superman" },
+      { src: "src/images/personagens/bucky.png", alt: "Bucky" },
+      { src: "src/images/personagens/pantera-negra.png", alt: "Pantera Negra" }
     ]
   },
   leadingmen: {
     title: "Galãs do Cinema",
     items: [
-      { src: "src/images/damon-salvatore.png", alt: "Damon Salvatore" },
-      { src: "src/images/dean-winchester.png", alt: "Dean Winchester" },
-      { src: "src/images/sam-winchester.png", alt: "Sam Winchester" },
-      { src: "src/images/pedro-novaes.png", alt: "Pedro Novaes" },
-      { src: "src/images/tommy_shelby.png", alt: "Tommy Shelby" },
-      { src: "src/images/johnny_depp.png", alt: "Johnny Depp" },
-      { src: "src/images/leo_dicaprio.png", alt: "Leonardo DiCaprio" },
-      { src: "src/images/robert-pattinson.png", alt: "Robert Pattinson" }
+      { src: "src/images/personagens/thimothee.png", alt: "Thimothee" },
+      { src: "src/images/personagens/damon-salvatore.png", alt: "Damon Salvatore" },
+      { src: "src/images/personagens/leo_dicaprio.png", alt: "Leonardo DiCaprio" },
+      { src: "src/images/personagens/robert-pattinson.png", alt: "Robert Pattinson" },
+      { src: "src/images/personagens/pedro-novaes.png", alt: "Pedro Novaes" },
+      { src: "src/images/personagens/tommy_shelby.png", alt: "Tommy Shelby" },
+      { src: "src/images/personagens/king-caspian.png", alt: "Rei Caspian" },
+      { src: "src/images/personagens/johnny_depp.png", alt: "Johnny Depp" },
     ]
   },
+  
   games: {
-    title: "Personagens de Jogos",
+    title: "Personagens/ de Jogos",
     items: [
-      { src: "src/images/kratos.png", alt: "Kratos" },
-      { src: "src/images/geralt.png", alt: "Geralt de Rívia" },
-      { src: "src/images/joel.png", alt: "Joel" },
-      { src: "src/images/ryu-mk.png", alt: "Ryu (Mortal Kombat)" },
-      { src: "src/images/steve-minecraft.png", alt: "Steve (Minecraft)" },
-      { src: "src/images/zed.png", alt: "Zed" },
-      { src: "src/images/darius.png", alt: "Darius" },
-      { src: "src/images/graves.png", alt: "Graves" }
+      { src: "src/images/personagens/kratos.png", alt: "Kratos" },
+      { src: "src/images/personagens/geralt.png", alt: "Geralt de Rívia" },
+      { src: "src/images/personagens/joel.png", alt: "Joel" },
+      { src: "src/images/personagens/ryu-mk.png", alt: "Ryu (Mortal Kombat)" },
+      { src: "src/images/personagens/steve-minecraft.png", alt: "Steve (Minecraft)" },
+      { src: "src/images/personagens/zed.png", alt: "Zed" },
+      { src: "src/images/personagens/darius.png", alt: "Darius" },
+      { src: "src/images/personagens/graves.png", alt: "Graves" }
     ]
   },
   singers: {
     title: "Cantores/Ícones da Música",
     items: [
-      { src: "src/images/harry_styles.png", alt: "Harry Styles" },
-      { src: "src/images/justin_bieber.png", alt: "Justin Bieber" },
-      { src: "src/images/jungkook.png", alt: "Jungkook" },
-      { src: "src/images/ed-sheeran.png", alt: "Ed Sheeran" },
-      { src: "src/images/henrique.png", alt: "Henrique" },
-      { src: "src/images/chico_buarque.png", alt: "Chico Buarque" },
-      { src: "src/images/shawn_mendes.png", alt: "Shawn Mendes" },
-      { src: "src/images/david_bowie.png", alt: "David Bowie" }
+      { src: "src/images/personagens/harry-styles.png", alt: "Harry Styles" },
+      { src: "src/images/personagens/justin_bieber.png", alt: "Justin Bieber" },
+      { src: "src/images/personagens/jungkook.png", alt: "Jungkook" },
+      { src: "src/images/personagens/ed-sheeran.png", alt: "Ed Sheeran" },
+      { src: "src/images/personagens/shawn_mendes.png", alt: "Shawn Mendes" },
+      { src: "src/images/personagens/henrique.png", alt: "Henrique" },
+      { src: "src/images/personagens/chico_buarque.png", alt: "Chico Buarque" },
+      { src: "src/images/personagens/david_bowie.png", alt: "David Bowie" }
     ]
   },
   series: {
     title: "Personagens de Séries",
     items: [
-      { src: "src/images/anthony-brigerton.png", alt: "Anthony Bridgerton" },
-      { src: "src/images/benedict-bridgerton.png", alt: "Benedict Bridgerton" },
-      { src: "src/images/thimothee.png", alt: "Thimothee" },
-      { src: "src/images/armani.png", alt: "Armani" },
-      { src: "src/images/george-weasley.png", alt: "George Weasley" },
-      { src: "src/images/king-caspian.png", alt: "Rei Caspian" },
-      { src: "src/images/javier-pena.png", alt: "Javier Peña" },
-      { src: "src/images/marcus-lopez.png", alt: "Marcus Lopez" }
+      { src: "src/images/personagens/anthony-brigerton.png", alt: "Anthony Bridgerton" },
+      { src: "src/images/personagens/benedict-bridgerton.png", alt: "Benedict Bridgerton" },
+      { src: "src/images/personagens/dean-winchester.png", alt: "Dean Winchester" },
+      { src: "src/images/personagens/sam-winchester.png", alt: "Sam Winchester" },
+      { src: "src/images/personagens/armani.png", alt: "Armani" },
+      { src: "src/images/personagens/george-weasley.png", alt: "George Weasley" },
+      { src: "src/images/personagens/javier-pena.png", alt: "Javier Peña" },
+      { src: "src/images/personagens/marcus-lopez.png", alt: "Marcus Lopez" }
     ]
-  }
+  },
+
+
+
+  feios: {
+    title: "Galãs Feios",
+    items: [
+      { src: "src/images/personagens/ronaldo.png", alt: "Ronaldo" },
+      { src: "src/images/personagens/pedro-pascal.png", alt: "Pedro Pascal" },
+      { src: "src/images/personagens/wagner-moura.png", alt: "Wagner Moura" },
+      { src: "src/images/personagens/tom-hiddleston.png", alt: "Tom-Hiddleston" },
+      { src: "src/images/personagens/hugh-jackman.png", alt: "Hugh Jackman" },
+      { src: "src/images/personagens/rodrigo-simas.png", alt: "Rodrigo Simas" },
+      { src: "src/images/personagens/jesuita-barbosa.png", alt: "Jesuita Barbosa" },
+      { src: "src/images/personagens/ryan-gosling.png", alt: "Ryan Gossling" }
+    ]
+  },
+  viloes: {
+    title: "Vilões/Anti Heróis",
+    items: [
+      { src: "src/images/personagens/deadpool.png", alt: "Deadpool" },
+      { src: "src/images/personagens/justin_bieber.png", alt: "Justin Bieber" },
+      { src: "src/images/personagens/jungkook.png", alt: "Jungkook" },
+      { src: "src/images/personagens/ed-sheeran.png", alt: "Ed Sheeran" },
+      { src: "src/images/personagens/henrique.png", alt: "Henrique" },
+      { src: "src/images/personagens/chico_buarque.png", alt: "Chico Buarque" },
+      { src: "src/images/personagens/shawn_mendes.png", alt: "Shawn Mendes" },
+      { src: "src/images/personagens/david_bowie.png", alt: "David Bowie" }
+    ]
+  },
+  desenhos: {
+    title: "Personagens de Desenhos",
+    items: [
+      { src: "src/images/personagens/anthony-brigerton.png", alt: "Anthony Bridgerton" },
+      { src: "src/images/personagens/benedict-bridgerton.png", alt: "Benedict Bridgerton" },
+      { src: "src/images/personagens/thimothee.png", alt: "Thimothee" },
+      { src: "src/images/personagens/armani.png", alt: "Armani" },
+      { src: "src/images/personagens/george-weasley.png", alt: "George Weasley" },
+      { src: "src/images/personagens/king-caspian.png", alt: "Rei Caspian" },
+      { src: "src/images/personagens/javier-pena.png", alt: "Javier Peña" },
+      { src: "src/images/personagens/marcus-lopez.png", alt: "Marcus Lopez" }
+    ]
+  },
 };
     const categoriesPage = document.getElementById('categories-page');
     const carouselPage = document.getElementById('carousel-page');
