@@ -124,36 +124,14 @@ button img {
     font-size: 16px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
 
     body {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        background-image: url('src/images/celular6.png');
-    }
-
-    button {
-        margin-top: -90px;
-        margin-right: 0px;
-        font-size: 14px;
-        padding: 10px 20px;
-    }
-
-    button h1 {
-        font-size: 20px;
-        margin-top: -8px;
-        padding-left: 30px;
-    }
-
-
-    button img {
-        width: 50px;
-        height: 50px;
-        margin-top: -5px;
-        padding-left: 5px;
-        background: none;
+        background-image: url('../images/celular2.png');
     }
 
     p {
