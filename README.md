@@ -1,6 +1,6 @@
 # 💅 Macho Makeover
 
-**Macho Cakeover** é um jogo web hilário e interativo que eu criei, onde você pode *vestir e enfeitar* homens ultra-machos (tipo o The Rock) com acessórios femininos, chápeus, perucas e muito mais! 
+**Macho Makeover** é um jogo web hilário e interativo que eu criei, onde você pode *vestir e enfeitar* homens ultra-machos (tipo o The Rock) com acessórios femininos, chápeus, perucas e muito mais! 
 
 ## 🎯 Objetivo
 
@@ -24,7 +24,7 @@ Escolha seu macho favorito e solte a criatividade: coloque laços, tiaras, colar
 
 * Figma
 * HTML5
-* CSS3 (com animações e efeitos visuais)
+* CSS3 
 * JavaScript puro
 
 ## 🚀 Como Jogar
@@ -35,4 +35,4 @@ Acesse o link da vercel ao lado e se divirta
 
 Esse jogo foi criado por 💖 com muito bom humor e criatividade! Um projeto feito por diversão, que mistura programação, design e arte.
 
-> Macho Cakeover: porque todo machão merece uma repaginada com glitter. ✨
+> Macho Makeover: porque todo machão merece uma repaginada com glitter. ✨
