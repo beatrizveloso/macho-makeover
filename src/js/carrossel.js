@@ -3,6 +3,8 @@
       action: {
     title: "Filmes de Ação",
     items: [
+      // { src: "src/images/personagens/cris1.png", alt: "Capitão Nascimento" },
+      // { src: "src/images/personagens/cris2.png", alt: "Rambo" },
       { src: "src/images/personagens/capitao-nasc.png", alt: "Capitão Nascimento" },
       { src: "src/images/personagens/rambo.png", alt: "Rambo" },
       { src: "src/images/personagens/john_wick.png", alt: "John Wick" },
