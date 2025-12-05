@@ -9,28 +9,31 @@ document.addEventListener("DOMContentLoaded", function() {
   const togglePanelBtn = document.getElementById("togglePanel");
   const saveButton = document.getElementById("saveAvatar");
   const tabs = document.querySelectorAll(".tab");
+  const canvasDropZone = document.getElementById("canvasDropZone");
 
   const selectedCharacter = localStorage.getItem('selectedCharacter');
   let characterImage = null;
   const accessoryImages = [];
   let selectedAccessory = null;
   let isDragging = false;
+  let isDraggingItem = false;
+  let dragItem = null;
   let resizing = null;
   let rotating = false;
-  let skewing = false;
-  let skewAxis = null;
   let panelCollapsed = false;
   let currentIndex = 0;
   let dragStartX, dragStartY;
   let initialWidth, initialHeight;
   let initialAngle = 0;
   let initialMouseAngle = 0;
-  let initialSkewX = 0;
-  let initialSkewY = 0;
+  let currentDraggedElement = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
   
-  const HANDLE_SIZE = 8;
-  const ROTATION_HANDLE_DISTANCE = 25;
-  const SKEW_HANDLE_DISTANCE = 20;
+  const HANDLE_SIZE = 12;
+  const ROTATION_HANDLE_DISTANCE = 35;
+  const MIN_SIZE = 30;
+  const MAX_SIZE = 800;
 
   function checkArrowsVisibility() {
     prevArrow.style.visibility = carousel.scrollTop > 0 ? 'visible' : 'hidden';
@@ -199,14 +202,13 @@ document.addEventListener("DOMContentLoaded", function() {
       );
     }
 
-    accessoryImages.forEach(({ img, x, y, width, height, angle = 0, skewX = 0, skewY = 0 }) => {
+    accessoryImages.forEach(({ img, x, y, width, height, angle = 0 }) => {
       ctx.save();
       const centerX = x + width / 2;
       const centerY = y + height / 2;
       
       ctx.translate(centerX, centerY);
       ctx.rotate(angle * Math.PI / 180);
-      ctx.transform(1, skewY, skewX, 1, 0, 0);
       
       ctx.drawImage(img, -width / 2, -height / 2, width, height);
       
@@ -218,15 +220,17 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.fillStyle = "rgba(143, 28, 85, 0.8)";
         
         const cornerHandles = [
-          { x: -width/2, y: -height/2, type: 'resize', corner: 'nw' }, 
-          { x: width/2, y: -height/2, type: 'resize', corner: 'ne' },    
-          { x: -width/2, y: height/2, type: 'resize', corner: 'sw' },    
-          { x: width/2, y: height/2, type: 'resize', corner: 'se' },    
-          
-          { x: 0, y: -height/2, type: 'resize', corner: 'n' },          
-          { x: width/2, y: 0, type: 'resize', corner: 'e' },           
-          { x: 0, y: height/2, type: 'resize', corner: 's' },      
-          { x: -width/2, y: 0, type: 'resize', corner: 'w' },           
+          { x: -width/2, y: -height/2, corner: 'nw' },
+          { x: width/2, y: -height/2, corner: 'ne' },
+          { x: -width/2, y: height/2, corner: 'sw' },
+          { x: width/2, y: height/2, corner: 'se' }
+        ];
+        
+        const edgeHandles = [
+          { x: 0, y: -height/2, corner: 'n' },
+          { x: width/2, y: 0, corner: 'e' },
+          { x: 0, y: height/2, corner: 's' },
+          { x: -width/2, y: 0, corner: 'w' }
         ];
         
         cornerHandles.forEach(({x, y}) => {
@@ -235,41 +239,30 @@ document.addEventListener("DOMContentLoaded", function() {
           ctx.fill();
         });
         
+        edgeHandles.forEach(({x, y}) => {
+          ctx.beginPath();
+          ctx.arc(x, y, HANDLE_SIZE/1.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        
         const rotationHandleY = -height/2 - ROTATION_HANDLE_DISTANCE;
-        ctx.beginPath();
-        ctx.arc(0, rotationHandleY, HANDLE_SIZE, 0, Math.PI * 2);
-        ctx.fill();
         
-        ctx.beginPath();
-        ctx.moveTo(0, -height/2);
-        ctx.lineTo(0, rotationHandleY);
-        ctx.strokeStyle = "rgba(212, 68, 153, 0.8)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        // ctx.beginPath();
+        // ctx.arc(0, rotationHandleY, HANDLE_SIZE, 0, Math.PI * 2);
+        // // ctx.fill();
         
-        if (Math.abs(skewX) > 0.1 || Math.abs(skewY) > 0.1) {
-          ctx.restore();
-          ctx.save();
-          ctx.translate(centerX, centerY);
-          ctx.rotate(angle * Math.PI / 180);
-          
-          ctx.fillStyle = "rgba(68, 212, 153, 0.8)";
-          ctx.beginPath();
-          ctx.arc(width/2 + SKEW_HANDLE_DISTANCE, 0, HANDLE_SIZE, 0, Math.PI * 2);
-          ctx.fill();
-          
-          ctx.beginPath();
-          ctx.arc(0, -height/2 - SKEW_HANDLE_DISTANCE, HANDLE_SIZE, 0, Math.PI * 2);
-          ctx.fill();
-          
-          ctx.beginPath();
-          ctx.moveTo(width/2, 0);
-          ctx.lineTo(width/2 + SKEW_HANDLE_DISTANCE, 0);
-          ctx.moveTo(0, -height/2);
-          ctx.lineTo(0, -height/2 - SKEW_HANDLE_DISTANCE);
-          ctx.strokeStyle = "rgba(68, 212, 153, 0.8)";
-          ctx.stroke();
-        }
+        // ctx.strokeStyle = "rgba(212, 68, 153, 0.8)";
+        // // ctx.lineWidth = 2;
+        
+        // ctx.beginPath();
+        // ctx.moveTo(0, -height/2);
+        // ctx.lineTo(0, rotationHandleY);
+        // ctx.stroke();
+        
+        // ctx.fillStyle = "rgba(68, 153, 212, 0.8)";
+        // ctx.beginPath();
+        // ctx.arc(0, rotationHandleY, HANDLE_SIZE/2, 0, Math.PI * 2);
+        // ctx.fill();
       }
       ctx.restore();
     });
@@ -284,19 +277,17 @@ document.addEventListener("DOMContentLoaded", function() {
     };
   }
   
-  function addAccessory(imageSrc) {
+  function addAccessory(imageSrc, x = null, y = null) {
     const img = new Image();
     img.src = imageSrc;
     img.onload = () => {
       const newAccessory = {
         img,
-        x: (canvas.width - 100) / 2,
-        y: (canvas.height - 100) / 2,
+        x: x !== null ? x : (canvas.width - 100) / 2,
+        y: y !== null ? y : (canvas.height - 100) / 2,
         width: 100,
         height: 100,
-        angle: 0,
-        skewX: 0,
-        skewY: 0
+        angle: 0
       };
       accessoryImages.push(newAccessory);
       selectedAccessory = newAccessory;
@@ -341,23 +332,26 @@ document.addEventListener("DOMContentLoaded", function() {
     
     const localX = (x - centerX) * cos - (y - centerY) * sin;
     const localY = (x - centerX) * sin + (y - centerY) * cos;
-  
-    const resizeHandles = [
-      { name: "resize-nw", x: -acc.width/2, y: -acc.height/2 },
-      { name: "resize-ne", x: acc.width/2, y: -acc.height/2 },
-      { name: "resize-sw", x: -acc.width/2, y: acc.height/2 },
-      { name: "resize-se", x: acc.width/2, y: acc.height/2 },
-      { name: "resize-n", x: 0, y: -acc.height/2 },
-      { name: "resize-e", x: acc.width/2, y: 0 },
-      { name: "resize-s", x: 0, y: acc.height/2 },
-      { name: "resize-w", x: -acc.width/2, y: 0 }
+
+    const cornerHandles = [
+      { name: "resize-nw", x: -acc.width/2, y: -acc.height/2, size: HANDLE_SIZE },
+      { name: "resize-ne", x: acc.width/2, y: -acc.height/2, size: HANDLE_SIZE },
+      { name: "resize-sw", x: -acc.width/2, y: acc.height/2, size: HANDLE_SIZE },
+      { name: "resize-se", x: acc.width/2, y: acc.height/2, size: HANDLE_SIZE }
     ];
     
-    for (const handle of resizeHandles) {
+    const edgeHandles = [
+      { name: "resize-n", x: 0, y: -acc.height/2, size: HANDLE_SIZE/1.5 },
+      { name: "resize-e", x: acc.width/2, y: 0, size: HANDLE_SIZE/1.5 },
+      { name: "resize-s", x: 0, y: acc.height/2, size: HANDLE_SIZE/1.5 },
+      { name: "resize-w", x: -acc.width/2, y: 0, size: HANDLE_SIZE/1.5 }
+    ];
+    
+    for (const handle of [...cornerHandles, ...edgeHandles]) {
       const dx = localX - handle.x;
       const dy = localY - handle.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= HANDLE_SIZE) {
-        return { type: handle.name.split('-')[0], corner: handle.name.split('-')[1] };
+      if (Math.sqrt(dx * dx + dy * dy) <= handle.size) {
+        return { type: "resize", corner: handle.name.split('-')[1] };
       }
     }
     
@@ -367,25 +361,12 @@ document.addEventListener("DOMContentLoaded", function() {
     if (Math.sqrt(rotDx * rotDx + rotDy * rotDy) <= HANDLE_SIZE) {
       return { type: "rotate" };
     }
-    if (Math.abs(acc.skewX || 0) > 0.1 || Math.abs(acc.skewY || 0) > 0.1) {
-      // Skew horizontal
-      const skewHDx = localX - (acc.width/2 + SKEW_HANDLE_DISTANCE);
-      const skewHDy = localY - 0;
-      if (Math.sqrt(skewHDx * skewHDx + skewHDy * skewHDy) <= HANDLE_SIZE) {
-        return { type: "skew", axis: "x" };
-      }
-      
-      const skewVDx = localX - 0;
-      const skewVDy = localY - (-acc.height/2 - SKEW_HANDLE_DISTANCE);
-      if (Math.sqrt(skewVDx * skewVDx + skewVDy * skewVDy) <= HANDLE_SIZE) {
-        return { type: "skew", axis: "y" };
-      }
-    }
     
     return null;
   }
 
   function handleCanvasMouseDown(event) {
+    event.preventDefault();
     const rect = canvas.getBoundingClientRect();
     const offsetX = event.clientX - rect.left;
     const offsetY = event.clientY - rect.top;
@@ -405,15 +386,9 @@ document.addEventListener("DOMContentLoaded", function() {
           const centerX = selectedAccessory.x + selectedAccessory.width / 2;
           const centerY = selectedAccessory.y + selectedAccessory.height / 2;
           initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
+          drawCharacterAndAccessories();
+          return;
         } 
-        else if (control.type === "skew") {
-          skewing = true;
-          skewAxis = control.axis;
-          dragStartX = offsetX;
-          dragStartY = offsetY;
-          initialSkewX = selectedAccessory.skewX || 0;
-          initialSkewY = selectedAccessory.skewY || 0;
-        }
         else if (control.type === "resize") {
           resizing = control.corner;
           isDragging = true;
@@ -421,42 +396,28 @@ document.addEventListener("DOMContentLoaded", function() {
           dragStartY = offsetY;
           initialWidth = selectedAccessory.width;
           initialHeight = selectedAccessory.height;
+          drawCharacterAndAccessories();
+          return;
         }
-        
-        drawCharacterAndAccessories();
-        return;
       }
-    }
-    
-    selectedAccessory = clickedAccessory;
-    if (selectedAccessory) {
+      
+      selectedAccessory = clickedAccessory;
       isDragging = true;
       dragStartX = offsetX;
       dragStartY = offsetY;
-      const initialX = selectedAccessory.x;
-      const initialY = selectedAccessory.y;
-      
-      canvas.addEventListener("mousemove", function moveHandler(e) {
-        if (!isDragging) {
-          canvas.removeEventListener("mousemove", moveHandler);
-          return;
-        }
-        
-        const rect = canvas.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        const offsetY = e.clientY - rect.top;
-        
-        selectedAccessory.x = initialX + (offsetX - dragStartX);
-        selectedAccessory.y = initialY + (offsetY - dragStartY);
-        drawCharacterAndAccessories();
-      });
+      drawCharacterAndAccessories();
+      return;
     }
     
+    selectedAccessory = null;
     drawCharacterAndAccessories();
     updateLayersPanel();
   }
 
   function handleCanvasMouseMove(event) {
+    if (!isDragging && !rotating) return;
+    
+    event.preventDefault();
     const rect = canvas.getBoundingClientRect();
     const offsetX = event.clientX - rect.left;
     const offsetY = event.clientY - rect.top;
@@ -468,110 +429,100 @@ document.addEventListener("DOMContentLoaded", function() {
       const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
       selectedAccessory.angle = initialAngle + (newMouseAngle - initialMouseAngle);
       
-      drawCharacterAndAccessories();
-      return;
-    }
-    
-    if (skewing && selectedAccessory) {
-      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
-      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
-      
-      const angle = -selectedAccessory.angle * Math.PI / 180;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      
-      const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
-      const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
-      
-      const startLocalX = (dragStartX - centerX) * cos - (dragStartY - centerY) * sin;
-      const startLocalY = (dragStartX - centerX) * sin + (dragStartY - centerY) * cos;
-      
-      if (skewAxis === "x") {
-        selectedAccessory.skewX = initialSkewX + (localY - startLocalY) / 100;
-      } else {
-        selectedAccessory.skewY = initialSkewY + (localX - startLocalX) / 100;
-      }
+      selectedAccessory.angle = selectedAccessory.angle % 360;
+      if (selectedAccessory.angle < 0) selectedAccessory.angle += 360;
       
       drawCharacterAndAccessories();
       return;
     }
     
-    if (isDragging && selectedAccessory && resizing) {
-      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
-      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
-      
-      const angle = -selectedAccessory.angle * Math.PI / 180;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      
-      const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
-      const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
-      
-      const startLocalX = (dragStartX - centerX) * cos - (dragStartY - centerY) * sin;
-      const startLocalY = (dragStartX - centerX) * sin + (dragStartY - centerY) * cos;
-      
-      let newWidth = initialWidth;
-      let newHeight = initialHeight;
-      let deltaX = 0;
-      let deltaY = 0;
+    if (isDragging && selectedAccessory) {
+      if (resizing) {
+        const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+        const centerY = selectedAccessory.y + selectedAccessory.height / 2;
+        
+        const angle = -selectedAccessory.angle * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        
+        const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
+        const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
+        
+        const startLocalX = (dragStartX - centerX) * cos - (dragStartY - centerY) * sin;
+        const startLocalY = (dragStartX - centerX) * sin + (dragStartY - centerY) * cos;
+        
+        let newWidth = initialWidth;
+        let newHeight = initialHeight;
+        let deltaX = 0;
+        let deltaY = 0;
 
-      switch(resizing) {
-        case "nw": 
-          newWidth = initialWidth - (localX - startLocalX) * 2;
-          newHeight = initialHeight - (localY - startLocalY) * 2;
-          deltaX = (localX - startLocalX);
-          deltaY = (localY - startLocalY);
-          break;
-        case "ne": 
-          newWidth = initialWidth + (localX - startLocalX) * 2;
-          newHeight = initialHeight - (localY - startLocalY) * 2;
-          deltaY = (localY - startLocalY);
-          break;
-        case "sw":
-          newWidth = initialWidth - (localX - startLocalX) * 2;
-          newHeight = initialHeight + (localY - startLocalY) * 2;
-          deltaX = (localX - startLocalX);
-          break;
-        case "se": 
-          newWidth = initialWidth + (localX - startLocalX) * 2;
-          newHeight = initialHeight + (localY - startLocalY) * 2;
-          break;
-        case "n":
-          newHeight = initialHeight - (localY - startLocalY) * 2;
-          deltaY = (localY - startLocalY);
-          break;
-        case "e":
-          newWidth = initialWidth + (localX - startLocalX) * 2;
-          break;
-        case "s": 
-          newHeight = initialHeight + (localY - startLocalY) * 2;
-          break;
-        case "w": 
-          newWidth = initialWidth - (localX - startLocalX) * 2;
-          deltaX = (localX - startLocalX);
-          break;
-      }
-      
-      newWidth = Math.max(30, Math.min(800, newWidth));
-      newHeight = Math.max(30, Math.min(800, newHeight));
-      
-      if (event.shiftKey) {
-        const aspect = initialWidth / initialHeight;
-        if (resizing.includes("w") || resizing.includes("e")) {
-          newHeight = newWidth / aspect;
-        } else {
-          newWidth = newHeight * aspect;
+        switch(resizing) {
+          case "nw": 
+            newWidth = initialWidth - (localX - startLocalX) * 2;
+            newHeight = initialHeight - (localY - startLocalY) * 2;
+            deltaX = (localX - startLocalX);
+            deltaY = (localY - startLocalY);
+            break;
+          case "ne": 
+            newWidth = initialWidth + (localX - startLocalX) * 2;
+            newHeight = initialHeight - (localY - startLocalY) * 2;
+            deltaY = (localY - startLocalY);
+            break;
+          case "sw":
+            newWidth = initialWidth - (localX - startLocalX) * 2;
+            newHeight = initialHeight + (localY - startLocalY) * 2;
+            deltaX = (localX - startLocalX);
+            break;
+          case "se": 
+            newWidth = initialWidth + (localX - startLocalX) * 2;
+            newHeight = initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "n":
+            newHeight = initialHeight - (localY - startLocalY) * 2;
+            deltaY = (localY - startLocalY);
+            break;
+          case "e":
+            newWidth = initialWidth + (localX - startLocalX) * 2;
+            break;
+          case "s": 
+            newHeight = initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "w": 
+            newWidth = initialWidth - (localX - startLocalX) * 2;
+            deltaX = (localX - startLocalX);
+            break;
         }
+        
+        newWidth = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newWidth));
+        newHeight = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newHeight));
+        
+        if (event.shiftKey) {
+          const aspect = initialWidth / initialHeight;
+          if (resizing.includes("w") || resizing.includes("e")) {
+            newHeight = newWidth / aspect;
+          } else {
+            newWidth = newHeight * aspect;
+          }
+        }
+        
+        const widthRatio = newWidth / selectedAccessory.width;
+        const heightRatio = newHeight / selectedAccessory.height;
+        
+        selectedAccessory.x = centerX - (centerX - selectedAccessory.x) * widthRatio;
+        selectedAccessory.y = centerY - (centerY - selectedAccessory.y) * heightRatio;
+        
+        selectedAccessory.width = newWidth;
+        selectedAccessory.height = newHeight;
+      } else {
+        const deltaX = offsetX - dragStartX;
+        const deltaY = offsetY - dragStartY;
+        
+        selectedAccessory.x += deltaX;
+        selectedAccessory.y += deltaY;
+        
+        dragStartX = offsetX;
+        dragStartY = offsetY;
       }
-      
-      const widthRatio = newWidth / selectedAccessory.width;
-      const heightRatio = newHeight / selectedAccessory.height;
-      
-      selectedAccessory.x = centerX - (centerX - selectedAccessory.x) * widthRatio;
-      selectedAccessory.y = centerY - (centerY - selectedAccessory.y) * heightRatio;
-      
-      selectedAccessory.width = newWidth;
-      selectedAccessory.height = newHeight;
       
       drawCharacterAndAccessories();
     }
@@ -581,7 +532,6 @@ document.addEventListener("DOMContentLoaded", function() {
     isDragging = false;
     resizing = null;
     rotating = false;
-    skewing = false;
     updateLayersPanel();
   }
 
@@ -622,6 +572,84 @@ document.addEventListener("DOMContentLoaded", function() {
     link.click();
   });
 
+  function setupDragAndDrop() {
+    const carouselItems = document.querySelectorAll('.carousel-item');
+    
+    carouselItems.forEach(item => {
+      item.setAttribute('draggable', 'true');
+      
+      item.addEventListener('dragstart', function(e) {
+        isDraggingItem = true;
+        currentDraggedElement = this;
+        const imgSrc = this.querySelector('img').src;
+        dragItem = { src: imgSrc };
+        e.dataTransfer.setData('text/plain', imgSrc);
+        e.dataTransfer.effectAllowed = 'copy';
+        
+        this.classList.add('dragging');
+        canvasDropZone.classList.add('active');
+        
+        const rect = this.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+      });
+      
+      item.addEventListener('dragend', function() {
+        isDraggingItem = false;
+        currentDraggedElement = null;
+        dragItem = null;
+        
+        this.classList.remove('dragging');
+        canvasDropZone.classList.remove('active');
+      });
+      
+      item.addEventListener('click', function(e) {
+        if (isDraggingItem) return;
+        const imgSrc = this.querySelector('img').src;
+        addAccessory(imgSrc);
+      });
+    });
+    
+    canvasDropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      this.style.backgroundColor = 'rgba(148, 1, 104, 0.5)';
+    });
+    
+    canvasDropZone.addEventListener('dragleave', function() {
+      this.style.backgroundColor = 'rgba(148, 1, 104, 0.3)';
+    });
+    
+    canvasDropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.backgroundColor = 'rgba(148, 1, 104, 0.3)';
+      canvasDropZone.classList.remove('active');
+      
+      const imgSrc = e.dataTransfer.getData('text/plain');
+      if (imgSrc) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        addAccessory(imgSrc, x - 50, y - 50);
+      }
+    });
+    
+    document.addEventListener('dragover', function(e) {
+      if (isDraggingItem) {
+        e.preventDefault();
+      }
+    });
+    
+    document.addEventListener('drop', function(e) {
+      if (isDraggingItem && !e.target.closest('.canvas-drop-zone')) {
+        canvasDropZone.classList.remove('active');
+        if (currentDraggedElement) {
+          currentDraggedElement.classList.remove('dragging');
+        }
+      }
+    });
+  }
+
   const items = {
     cabelos: Array.from({ length: 50 }, (_, i) => `src/images/cabelos/cabelo${i + 1}.png`),
     oculos: Array.from({ length: 50 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
@@ -640,11 +668,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function renderItems(category) {
     carousel.innerHTML = items[category].map(imageSrc => `
-      <div class="carousel-item">
-        <img src="${imageSrc}" alt="Acessório" onclick="addAccessory('${imageSrc}')">
+      <div class="carousel-item" draggable="true">
+        <img src="${imageSrc}" alt="Acessório" draggable="false">
       </div>
     `).join('');
     checkArrowsVisibility();
+    setTimeout(setupDragAndDrop, 0);
   }
 
   function updateTabs() {
@@ -665,6 +694,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setCharacter(selectedCharacter);
   } else {
     alert('Nenhum personagem foi selecionado!');
+    setCharacter('src/images/character.png');
   }
 
   updateTabs();
@@ -685,14 +715,22 @@ document.addEventListener("DOMContentLoaded", function() {
       
       if (event.key === "ArrowLeft") {
         selectedAccessory.angle -= rotationStep;
+        if (selectedAccessory.angle < 0) selectedAccessory.angle += 360;
         drawCharacterAndAccessories();
       } else if (event.key === "ArrowRight") {
         selectedAccessory.angle += rotationStep;
+        if (selectedAccessory.angle >= 360) selectedAccessory.angle -= 360;
         drawCharacterAndAccessories();
       } else if (event.key === "r" || event.key === "R") {
         selectedAccessory.angle = 0;
-        selectedAccessory.skewX = 0;
-        selectedAccessory.skewY = 0;
+        drawCharacterAndAccessories();
+      } else if (event.key === "ArrowUp") {
+        selectedAccessory.width = Math.min(MAX_SIZE, selectedAccessory.width + 5);
+        selectedAccessory.height = Math.min(MAX_SIZE, selectedAccessory.height + 5);
+        drawCharacterAndAccessories();
+      } else if (event.key === "ArrowDown") {
+        selectedAccessory.width = Math.max(MIN_SIZE, selectedAccessory.width - 5);
+        selectedAccessory.height = Math.max(MIN_SIZE, selectedAccessory.height - 5);
         drawCharacterAndAccessories();
       }
     }
