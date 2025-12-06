@@ -1,0 +1,125 @@
+.login-comandou-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  padding: 30px;
+}
+
+.login-comandou-card {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 500px;
+}
+
+.login-comandou-logo {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.logo-comandou-image {
+  height: 70px;
+  width: auto;
+}
+
+.login-comandou-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-comandou-header h2 {
+  color: #ef4229;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+}
+
+.login-comandou-header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.login-comandou-form {
+  width: 100%;
+}
+
+.form-group-comandou {
+  margin-bottom: 25px;
+}
+
+.form-group-comandou label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.login-comandou-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.login-comandou-input:focus {
+  border-color: #ef4229;
+  outline: none;
+}
+
+.password-input-container-comandou {
+  position: relative;
+}
+
+.password-input-container-comandou .login-comandou-input {
+  padding-right: 50px;
+}
+
+.password-toggle-comandou {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.login-comandou-button {
+  width: 100%;
+  padding: 14px;
+  background-color: #5ec53e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-comandou-button:hover {
+  background-color: #52a033;
+}
+
+.login-comandou-error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 480px) {
+.logo-comandou-image {
+  width: 90%;
+  height: auto;
+}
+}

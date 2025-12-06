@@ -6,7 +6,8 @@
     box-sizing: border-box;
     text-decoration: none;
 }
-body {
+
+.homepage-body {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -19,7 +20,7 @@ body {
     height: 100vh;
 }
 
-.text {
+.homepage-text {
     position: fixed;
     left: 0;
     top: 0;
@@ -31,7 +32,7 @@ body {
     align-items: center;
 }
 
-.content {
+.homepage-content {
     height: 33vh;
     display: flex;
     flex-direction: column;
@@ -40,7 +41,7 @@ body {
     width: 100%;
 }
 
-p {
+.homepage-paragraph {
     font-size: 22px;
     font-family: "Inter", serif;
     font-weight: 600;
@@ -49,7 +50,7 @@ p {
     text-align: center;
 }
 
-button {
+.homepage-button {
     display: flex;
     width: 290px;
     height: 80px;
@@ -59,34 +60,28 @@ button {
     background: none;
     background: linear-gradient(#ec91d1, #940168);
     border: none;
+    cursor: pointer;
 }
 
-img {
+.homepage-button-image {
     max-width: 100%;
     height: auto;
-}
-
-
-a {
-    background: none;
-}
-
-h1 {
-    font-size: 20px;
-    background: none;
-    padding-top: 25px;
-    padding-left: 40px;
-}
-
-button img {
     width: 55px;
-    height: 55px;
-    padding-top: 15px;
+    height: 50px;
+    padding-top: 0px;
     padding-left: 5px;
     background: none;
 }
- 
-#custom-alert {
+
+.homepage-heading {
+    font-size: 20px;
+    background: none;
+    padding-top: 15px;
+    padding-left: 25px;
+    color: rgb(0, 0, 0);
+}
+
+.homepage-custom-alert {
     position: fixed;
     top: 0;
     left: 0;
@@ -99,7 +94,7 @@ button img {
     z-index: 9999;
 }
 
-#custom-alert .alert-box {
+.homepage-custom-alert .homepage-alert-box {
     background: linear-gradient(#ffe6f0, #ff99cc);
     padding: 30px;
     border-radius: 20px;
@@ -108,13 +103,13 @@ button img {
     font-family: 'Arial', sans-serif;
 }
 
-#custom-alert .alert-box h2 {
+.homepage-custom-alert .homepage-alert-box .homepage-alert-title {
     margin: 0 0 15px;
     font-size: 22px;
     color: #94013e;
 }
 
-#custom-alert .alert-box button {
+.homepage-custom-alert .homepage-alert-box .homepage-alert-button {
     padding: 10px 20px;
     background-color: #94013e;
     color: white;
@@ -125,8 +120,7 @@ button img {
 }
 
 @media (max-width: 480px) {
-
-    body {
+    .homepage-body {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -134,7 +128,7 @@ button img {
         background-image: url('../images/celular2.png');
     }
 
-    p {
+    .homepage-paragraph {
         display: none;
     }
 }
