@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import './Personalizar.css';
 
+const PERSONALIZAR_TAMANHO_ALCA = 12;
+const PERSONALIZAR_DISTANCIA_ALCA_ROTACAO = 35;
+const PERSONALIZAR_TAMANHO_MINIMO = 30;
+const PERSONALIZAR_TAMANHO_MAXIMO = 800;
+
 const personalizarItens = {
   cabelos: Array.from({ length: 50 }, (_, i) => `/images/cabelos/cabelo${i + 1}.png`),
   oculos: Array.from({ length: 50 }, (_, i) => `/images/oculos/oculos${i + 1}.png`),
@@ -16,10 +21,22 @@ const personalizarItens = {
   ]
 };
 
+const calcRotHandle = (w, h, cornerX, cornerY, distance) => {
+  const vx = cornerX;
+  const vy = cornerY;
+  const len = Math.sqrt(vx * vx + vy * vy) || 1;
+  const nx = vx / len;
+  const ny = vy / len;
+  return { x: cornerX + nx * distance, y: cornerY + ny * distance };
+};
+
+const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
+
 const Personalizar = () => {
   const personalizarCanvasRef = useRef(null);
   const personalizarCarouselRef = useRef(null);
   const personalizarLayersPanelRef = useRef(null);
+
   const [personalizarImagemPersonagem, setPersonalizarImagemPersonagem] = useState(null);
   const [personalizarImagensAcessorios, setPersonalizarImagensAcessorios] = useState([]);
   const [personalizarAcessorioSelecionado, setPersonalizarAcessorioSelecionado] = useState(null);
@@ -29,29 +46,21 @@ const Personalizar = () => {
   const [personalizarArrastandoItem, setPersonalizarArrastandoItem] = useState(false);
   const [personalizarRedimensionando, setPersonalizarRedimensionando] = useState(null);
   const [personalizarRotacionando, setPersonalizarRotacionando] = useState(false);
-  const [personalizarDadosArraste, setPersonalizarDadosArraste] = useState({ startX: 0, startY: 0, initialWidth: 0, initialHeight: 0, initialAngle: 0, initialMouseAngle: 0 });
-  
-  const PERSONALIZAR_TAMANHO_ALCA = 12;
-  const PERSONALIZAR_DISTANCIA_ALCA_ROTACAO = 35;
-  const PERSONALIZAR_TAMANHO_MINIMO = 30;
-  const PERSONALIZAR_TAMANHO_MAXIMO = 800;
+  const [personalizarDadosArraste, setPersonalizarDadosArraste] = useState({
+    startX: 0, startY: 0, initialWidth: 0, initialHeight: 0, initialAngle: 0, initialMouseAngle: 0
+  });
 
   useEffect(() => {
     const personagemSelecionado = localStorage.getItem('carrosselPersonagemSelecionado');
-    if (personagemSelecionado) {
-      const img = new Image();
-      img.src = personagemSelecionado;
-      img.onload = () => {
-        setPersonalizarImagemPersonagem(img);
-      };
-    } else {
-      alert('Nenhum personagem foi selecionado!');
-      const img = new Image();
-      img.src = '/images/character.png';
-      img.onload = () => {
-        setPersonalizarImagemPersonagem(img);
-      };
-    }
+    const img = new Image();
+    img.src = personagemSelecionado || '/images/character.png';
+    img.onload = () => setPersonalizarImagemPersonagem(img);
+    img.onerror = () => {
+      // fallback
+      const fallback = new Image();
+      fallback.src = '/images/character.png';
+      fallback.onload = () => setPersonalizarImagemPersonagem(fallback);
+    };
   }, []);
 
   useEffect(() => {
@@ -61,7 +70,6 @@ const Personalizar = () => {
   const personalizarDesenharPersonagemEAcessorios = () => {
     const canvas = personalizarCanvasRef.current;
     if (!canvas) return;
-    
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -72,7 +80,6 @@ const Personalizar = () => {
       );
       const newWidth = personalizarImagemPersonagem.width * scale;
       const newHeight = personalizarImagemPersonagem.height * scale;
-
       ctx.drawImage(
         personalizarImagemPersonagem,
         (canvas.width - newWidth) / 2,
@@ -82,116 +89,187 @@ const Personalizar = () => {
       );
     }
 
-    personalizarImagensAcessorios.forEach((acessorio, index) => {
+    personalizarImagensAcessorios.forEach((acessorio) => {
+      if (!acessorio || !acessorio.img) return;
       const { img, x, y, width, height, angle = 0 } = acessorio;
-      if (!img) return;
-
       ctx.save();
       const centerX = x + width / 2;
       const centerY = y + height / 2;
-      
       ctx.translate(centerX, centerY);
       ctx.rotate(angle * Math.PI / 180);
-      
       ctx.drawImage(img, -width / 2, -height / 2, width, height);
+
+      if (personalizarAcessorioSelecionado && personalizarAcessorioSelecionado.id === acessorio.id) {
       
-      if (personalizarAcessorioSelecionado && personalizarAcessorioSelecionado.img === acessorio.img) {
-        ctx.strokeStyle = "rgba(148, 1, 104, 0.8)";
+        ctx.strokeStyle = "rgba(148, 1, 104, 0.9)";
         ctx.lineWidth = 2;
         ctx.strokeRect(-width / 2, -height / 2, width, height);
-        
-        ctx.fillStyle = "rgba(143, 28, 85, 0.8)";
-        
-        const cornerHandles = [
-          { x: -width/2, y: -height/2 },
-          { x: width/2, y: -height/2 },
-          { x: -width/2, y: height/2 },
-          { x: width/2, y: height/2 }
+
+        ctx.fillStyle = "rgba(143, 28, 85, 0.9)";
+
+        const corners = [
+          { x: -width/2, y: -height/2, name: 'nw' },
+          { x: width/2,  y: -height/2, name: 'ne' },
+          { x: -width/2, y: height/2,  name: 'sw' },
+          { x: width/2,  y: height/2,  name: 'se' }
         ];
-        
-        const edgeHandles = [
-          { x: 0, y: -height/2 },
-          { x: width/2, y: 0 },
-          { x: 0, y: height/2 },
-          { x: -width/2, y: 0 }
+
+        const edges = [
+          { x: 0, y: -height/2, name: 'n' },
+          { x: width/2, y: 0, name: 'e' },
+          { x: 0, y: height/2, name: 's' },
+          { x: -width/2, y: 0, name: 'w' }
         ];
-        
-        cornerHandles.forEach(({x, y}) => {
+
+        corners.forEach(c => {
           ctx.beginPath();
-          ctx.arc(x, y, PERSONALIZAR_TAMANHO_ALCA, 0, Math.PI * 2);
+          ctx.arc(c.x, c.y, PERSONALIZAR_TAMANHO_ALCA, 0, Math.PI * 2);
           ctx.fill();
         });
-        
-        edgeHandles.forEach(({x, y}) => {
+        edges.forEach(eh => {
           ctx.beginPath();
-          ctx.arc(x, y, PERSONALIZAR_TAMANHO_ALCA/1.5, 0, Math.PI * 2);
+          ctx.arc(eh.x, eh.y, PERSONALIZAR_TAMANHO_ALCA / 1.5, 0, Math.PI * 2);
           ctx.fill();
+        });
+
+        corners.forEach(c => {
+          const rh = calcRotHandle(width/2, height/2, c.x, c.y, PERSONALIZAR_DISTANCIA_ALCA_ROTACAO);
+          ctx.save();
+          ctx.beginPath();
+        ctx.fillStyle = "rgba(220, 220, 220, 0.56)";
+          ctx.arc(rh.x, rh.y, PERSONALIZAR_TAMANHO_ALCA, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "rgba(0,0,0,0.9)";
+          ctx.font = "12px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("↻", rh.x, rh.y);
+          ctx.restore();
         });
       }
+
       ctx.restore();
     });
+  };
+
+  const globalParaLocal = (x, y, acc) => {
+    const centerX = acc.x + acc.width / 2;
+    const centerY = acc.y + acc.height / 2;
+    const angle = -acc.angle * Math.PI / 180; 
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const dx = x - centerX;
+    const dy = y - centerY;
+    return {
+      x: dx * cos - dy * sin,
+      y: dx * sin + dy * cos
+    };
   };
 
   const personalizarObterAcessorioNaPosicao = (x, y) => {
     for (let i = personalizarImagensAcessorios.length - 1; i >= 0; i--) {
       const acc = personalizarImagensAcessorios[i];
-      const centerX = acc.x + acc.width / 2;
-      const centerY = acc.y + acc.height / 2;
-      
-      const angle = -acc.angle * Math.PI / 180;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      
-      const localX = (x - centerX) * cos - (y - centerY) * sin;
-      const localY = (x - centerX) * sin + (y - centerY) * cos;
-      
-      if (localX >= -acc.width/2 && localX <= acc.width/2 && 
-          localY >= -acc.height/2 && localY <= acc.height/2) {
+      const local = globalParaLocal(x, y, acc);
+      const hw = acc.width / 2;
+      const hh = acc.height / 2;
+
+      if (local.x >= -hw && local.x <= hw && local.y >= -hh && local.y <= hh) {
         return acc;
+      }
+
+      const cornerPositions = [
+        { x: -hw, y: -hh },
+        { x: hw,  y: -hh },
+        { x: -hw, y: hh },
+        { x: hw,  y: hh }
+      ];
+      for (const c of cornerPositions) {
+        const dx = local.x - c.x;
+        const dy = local.y - c.y;
+        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA) {
+          return acc;
+        }
+      }
+
+      const edgePositions = [
+        { x: 0, y: -hh },
+        { x: hw, y: 0 },
+        { x: 0, y: hh },
+        { x: -hw, y: 0 }
+      ];
+      for (const e of edgePositions) {
+        const dx = local.x - e.x;
+        const dy = local.y - e.y;
+        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA * 0.9) {
+          return acc;
+        }
+      }
+
+      for (const c of cornerPositions) {
+        const rh = calcRotHandle(hw, hh, c.x, c.y, PERSONALIZAR_DISTANCIA_ALCA_ROTACAO);
+        const dx = local.x - rh.x;
+        const dy = local.y - rh.y;
+        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA) {
+          return acc;
+        }
       }
     }
     return null;
   };
 
   const personalizarDetectarControle = (x, y, acc) => {
-    const centerX = acc.x + acc.width / 2;
-    const centerY = acc.y + acc.height / 2;
-    const angle = -acc.angle * Math.PI / 180;
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    
-    const localX = (x - centerX) * cos - (y - centerY) * sin;
-    const localY = (x - centerX) * sin + (y - centerY) * cos;
+    const local = globalParaLocal(x, y, acc);
+    const hw = acc.width / 2;
+    const hh = acc.height / 2;
 
-    const cornerHandles = [
-      { name: "resize-nw", x: -acc.width/2, y: -acc.height/2, size: PERSONALIZAR_TAMANHO_ALCA },
-      { name: "resize-ne", x: acc.width/2, y: -acc.height/2, size: PERSONALIZAR_TAMANHO_ALCA },
-      { name: "resize-sw", x: -acc.width/2, y: acc.height/2, size: PERSONALIZAR_TAMANHO_ALCA },
-      { name: "resize-se", x: acc.width/2, y: acc.height/2, size: PERSONALIZAR_TAMANHO_ALCA }
+    const corners = [
+      { name: "resize-nw", x: -hw, y: -hh },
+      { name: "resize-ne", x: hw, y: -hh },
+      { name: "resize-sw", x: -hw, y: hh },
+      { name: "resize-se", x: hw, y: hh }
     ];
-    
-    const edgeHandles = [
-      { name: "resize-n", x: 0, y: -acc.height/2, size: PERSONALIZAR_TAMANHO_ALCA/1.5 },
-      { name: "resize-e", x: acc.width/2, y: 0, size: PERSONALIZAR_TAMANHO_ALCA/1.5 },
-      { name: "resize-s", x: 0, y: acc.height/2, size: PERSONALIZAR_TAMANHO_ALCA/1.5 },
-      { name: "resize-w", x: -acc.width/2, y: 0, size: PERSONALIZAR_TAMANHO_ALCA/1.5 }
-    ];
-    
-    for (const handle of [...cornerHandles, ...edgeHandles]) {
-      const dx = localX - handle.x;
-      const dy = localY - handle.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= handle.size) {
+    for (const handle of corners) {
+      const dx = local.x - handle.x;
+      const dy = local.y - handle.y;
+      if (Math.sqrt(dx * dx + dy * dy) <= PERSONALIZAR_TAMANHO_ALCA) {
         return { type: "resize", corner: handle.name.split('-')[1] };
       }
     }
-    
-    const rotationHandleY = -acc.height/2 - PERSONALIZAR_DISTANCIA_ALCA_ROTACAO;
-    const rotDx = localX - 0;
-    const rotDy = localY - rotationHandleY;
-    if (Math.sqrt(rotDx * rotDx + rotDy * rotDy) <= PERSONALIZAR_TAMANHO_ALCA) {
-      return { type: "rotate" };
+
+    const edges = [
+      { name: "resize-n", x: 0, y: -hh },
+      { name: "resize-e", x: hw, y: 0 },
+      { name: "resize-s", x: 0, y: hh },
+      { name: "resize-w", x: -hw, y: 0 }
+    ];
+    for (const handle of edges) {
+      const dx = local.x - handle.x;
+      const dy = local.y - handle.y;
+      if (Math.sqrt(dx * dx + dy * dy) <= PERSONALIZAR_TAMANHO_ALCA * 0.9) {
+        return { type: "resize", corner: handle.name.split('-')[1] };
+      }
     }
-    
+
+    const cornerPositions = [
+      { x: -hw, y: -hh, id: 'nw' },
+      { x: hw,  y: -hh, id: 'ne' },
+      { x: -hw, y: hh,  id: 'sw' },
+      { x: hw,  y: hh,  id: 'se' }
+    ];
+    for (const c of cornerPositions) {
+      const rh = calcRotHandle(hw, hh, c.x, c.y, PERSONALIZAR_DISTANCIA_ALCA_ROTACAO);
+      const dx = local.x - rh.x;
+      const dy = local.y - rh.y;
+      if (Math.sqrt(dx * dx + dy * dy) <= PERSONALIZAR_TAMANHO_ALCA) {
+        return { type: "rotate", corner: c.id };
+      }
+    }
+
+    if (local.x >= -hw && local.x <= hw && local.y >= -hh && local.y <= hh) {
+      return { type: "move" };
+    }
+
     return null;
   };
 
@@ -201,19 +279,18 @@ const Personalizar = () => {
     const rect = canvas.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
-    
+
     const clickedAccessory = personalizarObterAcessorioNaPosicao(offsetX, offsetY);
     if (clickedAccessory) {
       const control = personalizarDetectarControle(offsetX, offsetY, clickedAccessory);
+      setPersonalizarAcessorioSelecionado(clickedAccessory);
+
       if (control) {
-        setPersonalizarAcessorioSelecionado(clickedAccessory);
-        
-        if (control.type === "rotate") {
+        if (control.type === 'rotate') {
           setPersonalizarRotacionando(true);
           const centerX = clickedAccessory.x + clickedAccessory.width / 2;
           const centerY = clickedAccessory.y + clickedAccessory.height / 2;
           const initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
-          
           setPersonalizarDadosArraste({
             startX: offsetX,
             startY: offsetY,
@@ -223,8 +300,7 @@ const Personalizar = () => {
             initialMouseAngle
           });
           return;
-        } 
-        else if (control.type === "resize") {
+        } else if (control.type === 'resize') {
           setPersonalizarRedimensionando(control.corner);
           setPersonalizarArrastando(true);
           setPersonalizarDadosArraste({
@@ -236,77 +312,82 @@ const Personalizar = () => {
             initialMouseAngle: 0
           });
           return;
+        } else if (control.type === 'move') {
+          setPersonalizarArrastando(true);
+          setPersonalizarDadosArraste({
+            startX: offsetX,
+            startY: offsetY,
+            initialWidth: clickedAccessory.width,
+            initialHeight: clickedAccessory.height,
+            initialAngle: clickedAccessory.angle || 0,
+            initialMouseAngle: 0
+          });
+          return;
         }
+      } else {
+        setPersonalizarArrastando(true);
+        setPersonalizarDadosArraste({
+          startX: offsetX,
+          startY: offsetY,
+          initialWidth: clickedAccessory.width,
+          initialHeight: clickedAccessory.height,
+          initialAngle: clickedAccessory.angle || 0,
+          initialMouseAngle: 0
+        });
+        return;
       }
-      
-      setPersonalizarAcessorioSelecionado(clickedAccessory);
-      setPersonalizarArrastando(true);
-      setPersonalizarDadosArraste({
-        startX: offsetX,
-        startY: offsetY,
-        initialWidth: clickedAccessory.width,
-        initialHeight: clickedAccessory.height,
-        initialAngle: clickedAccessory.angle || 0,
-        initialMouseAngle: 0
-      });
-      return;
     }
-    
+
     setPersonalizarAcessorioSelecionado(null);
   };
 
   const personalizarMouseMoveCanvas = (e) => {
     if (!personalizarArrastando && !personalizarRotacionando) return;
-    
     e.preventDefault();
+
     const canvas = personalizarCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
-    
-    if (personalizarRotacionando && personalizarAcessorioSelecionado) {
+
+    if (!personalizarAcessorioSelecionado) return;
+
+    if (personalizarRotacionando) {
       const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
       const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
-      
       const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
       const newAngle = personalizarDadosArraste.initialAngle + (newMouseAngle - personalizarDadosArraste.initialMouseAngle);
-      
       const updatedAccessory = {
         ...personalizarAcessorioSelecionado,
         angle: ((newAngle % 360) + 360) % 360
       };
-      
-      setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-        acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-      ));
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
       return;
     }
-    
-    if (personalizarArrastando && personalizarAcessorioSelecionado) {
+
+    if (personalizarArrastando) {
       if (personalizarRedimensionando) {
         const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
         const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
-        
         const angle = -(personalizarAcessorioSelecionado.angle || 0) * Math.PI / 180;
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
-        
+     
         const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
         const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
-        
         const startLocalX = (personalizarDadosArraste.startX - centerX) * cos - (personalizarDadosArraste.startY - centerY) * sin;
         const startLocalY = (personalizarDadosArraste.startX - centerX) * sin + (personalizarDadosArraste.startY - centerY) * cos;
-        
+
         let newWidth = personalizarDadosArraste.initialWidth;
         let newHeight = personalizarDadosArraste.initialHeight;
 
         switch(personalizarRedimensionando) {
-          case "nw": 
+          case "nw":
             newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
             newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
             break;
-          case "ne": 
+          case "ne":
             newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
             newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
             break;
@@ -314,7 +395,7 @@ const Personalizar = () => {
             newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
             newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
             break;
-          case "se": 
+          case "se":
             newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
             newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
             break;
@@ -324,17 +405,19 @@ const Personalizar = () => {
           case "e":
             newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
             break;
-          case "s": 
+          case "s":
             newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
             break;
-          case "w": 
+          case "w":
             newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
             break;
+          default:
+            break;
         }
-        
+
         newWidth = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newWidth));
         newHeight = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newHeight));
-        
+
         if (e.shiftKey) {
           const aspect = personalizarDadosArraste.initialWidth / personalizarDadosArraste.initialHeight;
           if (personalizarRedimensionando.includes("w") || personalizarRedimensionando.includes("e")) {
@@ -343,13 +426,13 @@ const Personalizar = () => {
             newWidth = newHeight * aspect;
           }
         }
-        
+
         const widthRatio = newWidth / personalizarAcessorioSelecionado.width;
         const heightRatio = newHeight / personalizarAcessorioSelecionado.height;
-        
+
         const newX = centerX - (centerX - personalizarAcessorioSelecionado.x) * widthRatio;
         const newY = centerY - (centerY - personalizarAcessorioSelecionado.y) * heightRatio;
-        
+
         const updatedAccessory = {
           ...personalizarAcessorioSelecionado,
           x: newX,
@@ -357,26 +440,22 @@ const Personalizar = () => {
           width: newWidth,
           height: newHeight
         };
-        
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
+
+        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
         setPersonalizarAcessorioSelecionado(updatedAccessory);
       } else {
         const deltaX = offsetX - personalizarDadosArraste.startX;
         const deltaY = offsetY - personalizarDadosArraste.startY;
-        
+
         const updatedAccessory = {
           ...personalizarAcessorioSelecionado,
           x: personalizarAcessorioSelecionado.x + deltaX,
           y: personalizarAcessorioSelecionado.y + deltaY
         };
-        
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
+
+        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
         setPersonalizarAcessorioSelecionado(updatedAccessory);
-        
+
         setPersonalizarDadosArraste(prev => ({ ...prev, startX: offsetX, startY: offsetY }));
       }
     }
@@ -394,6 +473,7 @@ const Personalizar = () => {
     img.onload = () => {
       const canvas = personalizarCanvasRef.current;
       const newAccessory = {
+        id: makeId(),
         img,
         x: x !== null ? x : (canvas.width - 100) / 2,
         y: y !== null ? y : (canvas.height - 100) / 2,
@@ -408,7 +488,6 @@ const Personalizar = () => {
       }
     };
   };
-
   const personalizarSalvarAvatar = () => {
     const canvas = personalizarCanvasRef.current;
     const link = document.createElement("a");
@@ -417,71 +496,46 @@ const Personalizar = () => {
     link.click();
   };
 
-  const personalizarClicarAba = (categoria) => {
-    setPersonalizarAbaAtual(categoria);
-  };
-
-  const personalizarAlternarPainel = () => {
-    setPersonalizarPainelRecolhido(!personalizarPainelRecolhido);
-  };
+  const personalizarClicarAba = (categoria) => setPersonalizarAbaAtual(categoria);
+  const personalizarAlternarPainel = () => setPersonalizarPainelRecolhido(!personalizarPainelRecolhido);
 
   const personalizarTeclaPressionada = (e) => {
     if (e.key === "Delete" && personalizarAcessorioSelecionado) {
-      setPersonalizarImagensAcessorios(prev => prev.filter(acc => acc.img !== personalizarAcessorioSelecionado.img));
+      setPersonalizarImagensAcessorios(prev => prev.filter(acc => acc.id !== personalizarAcessorioSelecionado.id));
       setPersonalizarAcessorioSelecionado(null);
+      return;
     }
-    
-    if (personalizarAcessorioSelecionado) {
-      const rotationStep = e.shiftKey ? 1 : 5;
-      
-      if (e.key === "ArrowLeft") {
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          angle: ((personalizarAcessorioSelecionado.angle - rotationStep) % 360 + 360) % 360
-        };
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      } else if (e.key === "ArrowRight") {
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          angle: ((personalizarAcessorioSelecionado.angle + rotationStep) % 360 + 360) % 360
-        };
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      } else if (e.key === "r" || e.key === "R") {
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          angle: 0
-        };
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      } else if (e.key === "ArrowUp") {
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          width: Math.min(PERSONALIZAR_TAMANHO_MAXIMO, personalizarAcessorioSelecionado.width + 5),
-          height: Math.min(PERSONALIZAR_TAMANHO_MAXIMO, personalizarAcessorioSelecionado.height + 5)
-        };
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      } else if (e.key === "ArrowDown") {
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          width: Math.max(PERSONALIZAR_TAMANHO_MINIMO, personalizarAcessorioSelecionado.width - 5),
-          height: Math.max(PERSONALIZAR_TAMANHO_MINIMO, personalizarAcessorioSelecionado.height - 5)
-        };
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => 
-          acc.img === personalizarAcessorioSelecionado.img ? updatedAccessory : acc
-        ));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      }
+    if (!personalizarAcessorioSelecionado) return;
+
+    const rotationStep = e.shiftKey ? 1 : 5;
+    if (e.key === "ArrowLeft") {
+      const updatedAccessory = { ...personalizarAcessorioSelecionado, angle: ((personalizarAcessorioSelecionado.angle - rotationStep) % 360 + 360) % 360 };
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+    } else if (e.key === "ArrowRight") {
+      const updatedAccessory = { ...personalizarAcessorioSelecionado, angle: ((personalizarAcessorioSelecionado.angle + rotationStep) % 360 + 360) % 360 };
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+    } else if (e.key.toLowerCase() === "r") {
+      const updatedAccessory = { ...personalizarAcessorioSelecionado, angle: 0 };
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+    } else if (e.key === "ArrowUp") {
+      const updatedAccessory = {
+        ...personalizarAcessorioSelecionado,
+        width: Math.min(PERSONALIZAR_TAMANHO_MAXIMO, personalizarAcessorioSelecionado.width + 5),
+        height: Math.min(PERSONALIZAR_TAMANHO_MAXIMO, personalizarAcessorioSelecionado.height + 5)
+      };
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+    } else if (e.key === "ArrowDown") {
+      const updatedAccessory = {
+        ...personalizarAcessorioSelecionado,
+        width: Math.max(PERSONALIZAR_TAMANHO_MINIMO, personalizarAcessorioSelecionado.width - 5),
+        height: Math.max(PERSONALIZAR_TAMANHO_MINIMO, personalizarAcessorioSelecionado.height - 5)
+      };
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
     }
   };
 
@@ -513,16 +567,13 @@ const Personalizar = () => {
     }
   };
 
-  const personalizarArrasteSobre = (e) => {
-    e.preventDefault();
-  };
+  const personalizarArrasteSobre = (e) => e.preventDefault();
 
   const personalizarRolagemCarrossel = () => {
     const carousel = personalizarCarouselRef.current;
     const prevArrow = document.getElementById('personalizar-seta-anterior');
     const nextArrow = document.getElementById('personalizar-seta-proxima');
-    
-    if (prevArrow && nextArrow) {
+    if (prevArrow && nextArrow && carousel) {
       prevArrow.style.visibility = carousel.scrollTop > 0 ? 'visible' : 'hidden';
       nextArrow.style.visibility = carousel.scrollTop < carousel.scrollHeight - carousel.clientHeight ? 'visible' : 'hidden';
     }
@@ -531,18 +582,15 @@ const Personalizar = () => {
   const personalizarRolarCarrossel = (direcao) => {
     const carousel = personalizarCarouselRef.current;
     if (carousel) {
-      carousel.scrollBy({
-        top: direcao * carousel.clientHeight,
-        behavior: 'smooth'
-      });
+      carousel.scrollBy({ top: direcao * carousel.clientHeight, behavior: 'smooth' });
     }
   };
 
   return (
     <div className="personalizar-container" onDragOver={personalizarArrasteSobre}>
-      <div 
-        id="personalizar-painel-camadas" 
-        ref={personalizarLayersPanelRef} 
+      <div
+        id="personalizar-painel-camadas"
+        ref={personalizarLayersPanelRef}
         className={`personalizar-painel-camadas ${personalizarPainelRecolhido ? 'personalizar-recolhido' : ''}`}
       >
         <div className="personalizar-cabecalho-painel">
@@ -553,13 +601,11 @@ const Personalizar = () => {
         </div>
         {!personalizarPainelRecolhido && (
           <div className="personalizar-conteudo-painel">
-            <div className="personalizar-item-camada">
-              Personagem Base
-            </div>
+            <div className="personalizar-item-camada">Personagem Base</div>
             {[...personalizarImagensAcessorios].reverse().map((acessorio, index) => (
-              <div 
-                key={index} 
-                className={`personalizar-item-camada ${personalizarAcessorioSelecionado?.img === acessorio.img ? 'personalizar-selecionado' : ''}`}
+              <div
+                key={acessorio.id}
+                className={`personalizar-item-camada ${personalizarAcessorioSelecionado?.id === acessorio.id ? 'personalizar-selecionado' : ''}`}
                 onClick={() => setPersonalizarAcessorioSelecionado(acessorio)}
               >
                 Acessório {personalizarImagensAcessorios.length - index}
@@ -571,10 +617,10 @@ const Personalizar = () => {
 
       <div className="personalizar-alinhamento">
         <div className="personalizar-canva">
-          <canvas 
+          <canvas
             ref={personalizarCanvasRef}
-            id="personalizar-canvas-avatar" 
-            width="600" 
+            id="personalizar-canvas-avatar"
+            width="600"
             height="600"
             onMouseDown={personalizarMouseDownCanvas}
             onMouseMove={personalizarMouseMoveCanvas}
@@ -596,33 +642,25 @@ const Personalizar = () => {
       <div className="personalizar-container-carrossel">
         <div className="personalizar-container-abas">
           <div className="personalizar-abas">
-            <div className={`personalizar-aba ${personalizarAbaAtual === 'cabelos' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('cabelos')}>
-              Cabelos
-            </div>
-            <div className={`personalizar-aba ${personalizarAbaAtual === 'oculos' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('oculos')}>
-              Óculos
-            </div>
-            <div className={`personalizar-aba ${personalizarAbaAtual === 'colares' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('colares')}>
-              Colares
-            </div>
-            <div className={`personalizar-aba ${personalizarAbaAtual === 'chapeus' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('chapeus')}>
-              Chapeus
-            </div>
-            <div className={`personalizar-aba ${personalizarAbaAtual === 'adds' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('adds')}>
-              Adds
-            </div>
+            <div className={`personalizar-aba ${personalizarAbaAtual === 'cabelos' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('cabelos')}>Cabelos</div>
+            <div className={`personalizar-aba ${personalizarAbaAtual === 'oculos' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('oculos')}>Óculos</div>
+            <div className={`personalizar-aba ${personalizarAbaAtual === 'colares' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('colares')}>Colares</div>
+            <div className={`personalizar-aba ${personalizarAbaAtual === 'chapeus' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('chapeus')}>Chapeus</div>
+            <div className={`personalizar-aba ${personalizarAbaAtual === 'adds' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('adds')}>Adds</div>
           </div>
         </div>
+
         <div className="personalizar-seta" id="personalizar-seta-anterior" onClick={() => personalizarRolarCarrossel(-1)}>↑</div>
-        <div 
-          className="personalizar-carrossel" 
-          id="personalizar-carrossel" 
+
+        <div
+          className="personalizar-carrossel"
+          id="personalizar-carrossel"
           ref={personalizarCarouselRef}
           onScroll={personalizarRolagemCarrossel}
         >
           {personalizarItens[personalizarAbaAtual].map((imageSrc, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="personalizar-item-carrossel"
               draggable="true"
               onDragStart={(e) => personalizarInicioArraste(e, imageSrc)}
@@ -633,6 +671,7 @@ const Personalizar = () => {
             </div>
           ))}
         </div>
+
         <div className="personalizar-seta" id="personalizar-seta-proxima" onClick={() => personalizarRolarCarrossel(1)}>↓</div>
       </div>
     </div>
