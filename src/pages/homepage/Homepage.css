@@ -33,7 +33,7 @@
 }
 
 .homepage-content {
-    height: 33vh;
+    height: 42vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -55,7 +55,7 @@
     width: 290px;
     height: 80px;
     border-radius: 80px;
-    margin-top: 40px;
+    margin-top: 30px;
     margin-bottom: 150px;
     background: none;
     background: linear-gradient(#ec91d1, #940168);
@@ -76,7 +76,6 @@
 .homepage-heading {
     font-size: 20px;
     background: none;
-    padding-top: 15px;
     padding-left: 25px;
     color: rgb(0, 0, 0);
 }

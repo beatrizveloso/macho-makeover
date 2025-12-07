@@ -1,8 +1,6 @@
 .carrossel-container {
   display: flex;
-  justify-content: center;
   flex-direction: column;
-  align-items: center;
   min-height: 100vh;
   margin: 0;
   background: url('../images/cortina.png');
@@ -14,18 +12,48 @@
   padding: 20px;
 }
 
-.carrossel-texto {
+.carrossel-cabecalho {
   width: 100%;
-  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  margin-top: 10px;
   margin-bottom: 30px;
+  height: 120px;
+}
+
+.carrossel-botao-voltar {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #f3c5dc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  z-index: 10;
+}
+
+.carrossel-botao-voltar:hover {
+  color: #ff66b2;
+}
+
+.carrossel-texto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  height: 100%;
 }
 
 .carrossel-texto img {
   margin-left: -30px;
-  margin-bottom: 60px;
 }
 
 .carrossel-um,
@@ -40,6 +68,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1;
 }
 
 .carrossel-categorias {
@@ -47,23 +76,87 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 15px;
+  margin-top: 100px;
   margin-bottom: 30px;
-  max-width: 800px;
+  max-width: 990px;
 }
 
 .carrossel-botao-categoria {
   padding: 15px 10px;
-  height: 70px;
+  width: 320px;
+  height: 90px;
+  border-radius: 50px;
   background-color: #4d0938;
   color: rgb(245, 212, 243);
   border: none;
-  border-radius: 38px;
   cursor: pointer;
   font-weight: bold;
   font-size: 16px;
   transition: all 0.3s;
-  width: 250px;
   text-align: center;
+}
+
+.button-filmes-de-acao {
+  background-image: url('/images/button-filmes-de-acao.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-super-herois {
+  background-image: url('/images/button-super-herois.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-galao-cinema {
+  background-image: url('/images/button-galas-cinema.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-jogos {
+  background-image: url('/images/button-jogos.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-cantores {
+  background-image: url('/images/button-cantores.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-series {
+  background-image: url('/images/button-series.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-galao-feios {
+  background-image: url('/images/button-galas-feios.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-viloes {
+  background-image: url('/images/button-viloes.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button-desenhos {
+  background-image: url('/images/button-desenhos.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .carrossel-botao-categoria:hover {
@@ -76,22 +169,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.carrossel-botao-voltar {
-  width: auto;
-  height: 50px;
-  align-self: flex-start;
-  margin-bottom: 20px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #f3c5dc;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
+  flex: 1;
 }
 
 .carrossel-titulo-categoria {
@@ -99,6 +177,8 @@
   margin-bottom: 20px;
   color: #333;
   text-align: center;
+  color: #f3c5dc;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .carrossel-carrossel {
@@ -133,6 +213,7 @@
   height: 100%;
   object-fit: contain;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .carrossel-selecionado {
@@ -147,6 +228,7 @@
   display: flex;
   justify-content: space-between;
   transform: translateY(-50%);
+  padding: 0 20px;
 }
 
 .carrossel-botao-navegacao {
@@ -154,11 +236,16 @@
   border: none;
   color: #fff;
   font-size: 20px;
-  padding: 10px;
+  padding: 10px 15px;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 50%;
   outline: none;
   transition: background 0.3s;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carrossel-botao-navegacao:hover {
@@ -169,6 +256,7 @@
   margin-top: 30px;
   display: flex;
   justify-content: center;
+  margin-bottom: 30px;
 }
 
 .carrossel-botao-confirmar {
@@ -183,12 +271,18 @@
   background: linear-gradient(#ec91d1, #94013e);
   border: none;
   cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.carrossel-botao-confirmar:hover {
+  transform: scale(1.05);
 }
 
 .carrossel-botao-confirmar h1 {
   text-decoration: none;
   font-size: 20px;
   color: rgb(0, 0, 0);
+  font-weight: bold;
 }
 
 .carrossel-botao-confirmar img {
@@ -213,6 +307,7 @@
   padding: 30px;
   border-radius: 20px;
   text-align: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .carrossel-caixa-alerta h2 {
@@ -230,23 +325,48 @@
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+  transition: background-color 0.3s;
 }
 
-@media (max-width: 600px) {
+.carrossel-caixa-alerta button:hover {
+  background-color: #7a0132;
+}
+
+@media (max-width: 768px) {
+  .carrossel-cabecalho {
+    height: 100px;
+    margin-bottom: 20px;
+  }
+
+  .carrossel-botao-voltar {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    margin-right: 10px;
+    justify-content: flex-start;
+    padding: 8px 15px;
+    font-size: 16px;
+  }
+
   .carrossel-texto {
-    display: flex;
     flex-direction: column;
+    margin-left: 0;
   }
 
   .carrossel-um img {
-    width: 380px;
-    height: 70px;
-    margin-bottom: -30px;
+    width: 300px;
+    height: 60px;
+    margin-bottom: 5px;
   }
 
   .carrossel-dois img {
-    width: 200px;
-    height: 70px;
+    width: 160px;
+    height: 60px;
+  }
+
+  .carrossel-categorias {
+    max-width: 90%;
   }
 
   .carrossel-botao-categoria {
@@ -258,5 +378,48 @@
   .carrossel-carrossel {
     width: 95%;
     height: 250px;
+  }
+
+  .carrossel-controles {
+    padding: 0 10px;
+  }
+
+  .carrossel-botao-navegacao {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carrossel-cabecalho {
+    flex-direction: column;
+    height: auto;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .carrossel-botao-voltar {
+    align-self: flex-start;
+    margin: 0 0 10px 0;
+  }
+
+  .carrossel-um img {
+    width: 250px;
+    height: 50px;
+  }
+
+  .carrossel-dois img {
+    width: 130px;
+    height: 50px;
+  }
+
+  .carrossel-botao-categoria {
+    width: 90%;
+    max-width: 250px;
+  }
+
+  .carrossel-carrossel {
+    height: 200px;
   }
 }

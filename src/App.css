@@ -11,24 +11,17 @@
   font-family: "Inter", sans-serif;
 }
 
-:root {
-  --primary-color: #c5d1ce; 
-  --secondary-color: #c0cac9; 
-  --gray: gray; 
-  --background-gray: #2B313F; 
-}
-
 ::-webkit-scrollbar {
   width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1c2830;
+  background: #e7e7e7;
   border-radius: 15px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #293b44;
+  background-color: #ce339a;
   border-radius: 10px;
   /* border: 2px solid #181717; */
 }

@@ -73,7 +73,7 @@ const carrosselCategorias = {
     titulo: "Personagens de Séries",
     itens: [
       { src: "/images/personagens/anthony-brigerton.png", alt: "Anthony Bridgerton" },
-      { src: "/images/personagens/benedict-bridgerton.png", alt: "Benedict Bridgerton" },
+      { src: "/images/personagens/benedict-brigerton.png", alt: "Benedict Bridgerton" },
       { src: "/images/personagens/dean-winchester.png", alt: "Dean Winchester" },
       { src: "/images/personagens/sam-winchester.png", alt: "Sam Winchester" },
       { src: "/images/personagens/armani.png", alt: "Armani" },
@@ -182,36 +182,53 @@ const Carrossel = () => {
 
   return (
     <div className="carrossel-container">
-      <div className="carrossel-texto">
-        <div className="carrossel-um">
-          <img src="http://www.gigaglitters.com/created/F5LYma4SVL.gif" width="460" height="90" alt="Macho Makeover" />
-        </div>
-        <div className="carrossel-dois">
-          <img src="http://www.gigaglitters.com/created/hmXs2jRS7q.gif" width="270" height="90" alt="Makeover" />
+      <div className="carrossel-cabecalho">
+        {carrosselPaginaAtual === 'carrossel' && (
+          <button className="carrossel-botao-voltar" onClick={carrosselVoltarCategorias}>
+            <FaArrowLeft /> Voltar
+          </button>
+        )}
+        <div className="carrossel-texto">
+          {carrosselPaginaAtual === 'categorias' ? (
+            <>
+              <div className="carrossel-um">
+                <img src="http://www.gigaglitters.com/created/TMutGkY49g.gif" width="425" height="80" alt="Selecione uma" />
+              </div>
+              <div className="carrossel-dois">
+                <img src="http://www.gigaglitters.com/created/kZbMP6m9S2.gif" width="290" height="80" alt="categoria" />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="carrossel-um">
+                <img src="http://www.gigaglitters.com/created/F5LYma4SVL.gif" width="400" height="80" alt="Selecione um" />
+              </div>
+              <div className="carrossel-dois">
+                <img src="http://www.gigaglitters.com/created/hmXs2jRS7q.gif" width="240" height="80" alt="Macho" />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {carrosselPaginaAtual === 'categorias' && (
         <div className="carrossel-pagina-categorias">
           <div className="carrossel-categorias">
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('filmesAcao')}>Filmes de Ação</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('superHerois')}>Super-Heróis</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('galaoCinema')}>Galãs do Cinema</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('jogos')}>Personagens de Jogos</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('cantores')}>Cantores/Ícones da Música</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('series')}>Personagens de Séries</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('galaoFeios')}>Galãs Feios</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('viloes')}>Vilões/Anti Heróis</button>
-            <button className="carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('desenhos')}>Personagens de Desenhos</button>
+            <button className="button-filmes-de-acao carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('filmesAcao')}></button>
+            <button className="button-super-herois carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('superHerois')}></button>
+            <button className="button-galao-cinema carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('galaoCinema')}></button>
+            <button className="button-jogos carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('jogos')}></button>
+            <button className="button-cantores carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('cantores')}></button>
+            <button className="button-series carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('series')}></button>
+            <button className="button-galao-feios carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('galaoFeios')}></button>
+            <button className="button-viloes carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('viloes')}></button>
+            <button className="button-desenhos carrossel-botao-categoria" onClick={() => carrosselExibirCarrossel('desenhos')}></button>
           </div>
         </div>
       )}
 
       {carrosselPaginaAtual === 'carrossel' && carrosselCategoriaAtual && (
         <div className="carrossel-pagina-carrossel">
-          <button className="carrossel-botao-voltar" onClick={carrosselVoltarCategorias}>
-            <FaArrowLeft /> Voltar
-          </button>
           <h2 className="carrossel-titulo-categoria">{carrosselCategorias[carrosselCategoriaAtual].titulo}</h2>
           
           <div className="carrossel-carrossel">
