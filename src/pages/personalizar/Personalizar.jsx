@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaTrash, FaArrowRight } from 'react-icons/fa';
 import './Personalizar.css';
 
 const PERSONALIZAR_TAMANHO_ALCA = 12;
@@ -46,6 +46,7 @@ const Personalizar = () => {
   const [personalizarArrastandoItem, setPersonalizarArrastandoItem] = useState(false);
   const [personalizarRedimensionando, setPersonalizarRedimensionando] = useState(null);
   const [personalizarRotacionando, setPersonalizarRotacionando] = useState(false);
+  const [personalizarTocando, setPersonalizarTocando] = useState(false);
   const [personalizarDadosArraste, setPersonalizarDadosArraste] = useState({
     startX: 0, startY: 0, initialWidth: 0, initialHeight: 0, initialAngle: 0, initialMouseAngle: 0
   });
@@ -269,6 +270,204 @@ const Personalizar = () => {
     }
 
     return null;
+  };
+
+  const personalizarTouchStartCanvas = (e) => {
+    e.preventDefault();
+    const canvas = personalizarCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const offsetX = touch.clientX - rect.left;
+    const offsetY = touch.clientY - rect.top;
+
+    const clickedAccessory = personalizarObterAcessorioNaPosicao(offsetX, offsetY);
+    if (clickedAccessory) {
+      const control = personalizarDetectarControle(offsetX, offsetY, clickedAccessory);
+      setPersonalizarAcessorioSelecionado(clickedAccessory);
+      setPersonalizarTocando(true);
+
+      if (control) {
+        if (control.type === 'rotate') {
+          setPersonalizarRotacionando(true);
+          const centerX = clickedAccessory.x + clickedAccessory.width / 2;
+          const centerY = clickedAccessory.y + clickedAccessory.height / 2;
+          const initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
+          setPersonalizarDadosArraste({
+            startX: offsetX,
+            startY: offsetY,
+            initialWidth: clickedAccessory.width,
+            initialHeight: clickedAccessory.height,
+            initialAngle: clickedAccessory.angle || 0,
+            initialMouseAngle
+          });
+          return;
+        } else if (control.type === 'resize') {
+          setPersonalizarRedimensionando(control.corner);
+          setPersonalizarArrastando(true);
+          setPersonalizarDadosArraste({
+            startX: offsetX,
+            startY: offsetY,
+            initialWidth: clickedAccessory.width,
+            initialHeight: clickedAccessory.height,
+            initialAngle: clickedAccessory.angle || 0,
+            initialMouseAngle: 0
+          });
+          return;
+        } else if (control.type === 'move') {
+          setPersonalizarArrastando(true);
+          setPersonalizarDadosArraste({
+            startX: offsetX,
+            startY: offsetY,
+            initialWidth: clickedAccessory.width,
+            initialHeight: clickedAccessory.height,
+            initialAngle: clickedAccessory.angle || 0,
+            initialMouseAngle: 0
+          });
+          return;
+        }
+      } else {
+        setPersonalizarArrastando(true);
+        setPersonalizarDadosArraste({
+          startX: offsetX,
+          startY: offsetY,
+          initialWidth: clickedAccessory.width,
+          initialHeight: clickedAccessory.height,
+          initialAngle: clickedAccessory.angle || 0,
+          initialMouseAngle: 0
+        });
+        return;
+      }
+    }
+
+    setPersonalizarAcessorioSelecionado(null);
+  };
+
+  const personalizarTouchMoveCanvas = (e) => {
+    if (!personalizarArrastando && !personalizarRotacionando && !personalizarTocando) return;
+    e.preventDefault();
+
+    const canvas = personalizarCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const offsetX = touch.clientX - rect.left;
+    const offsetY = touch.clientY - rect.top;
+
+    if (!personalizarAcessorioSelecionado) return;
+
+    if (personalizarRotacionando) {
+      const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
+      const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
+      const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
+      const newAngle = personalizarDadosArraste.initialAngle + (newMouseAngle - personalizarDadosArraste.initialMouseAngle);
+      const updatedAccessory = {
+        ...personalizarAcessorioSelecionado,
+        angle: ((newAngle % 360) + 360) % 360
+      };
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+      return;
+    }
+
+    if (personalizarArrastando) {
+      if (personalizarRedimensionando) {
+        const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
+        const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
+        const angle = -(personalizarAcessorioSelecionado.angle || 0) * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+     
+        const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
+        const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
+        const startLocalX = (personalizarDadosArraste.startX - centerX) * cos - (personalizarDadosArraste.startY - centerY) * sin;
+        const startLocalY = (personalizarDadosArraste.startX - centerX) * sin + (personalizarDadosArraste.startY - centerY) * cos;
+
+        let newWidth = personalizarDadosArraste.initialWidth;
+        let newHeight = personalizarDadosArraste.initialHeight;
+
+        switch(personalizarRedimensionando) {
+          case "nw":
+            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
+            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
+            break;
+          case "ne":
+            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
+            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
+            break;
+          case "sw":
+            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
+            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "se":
+            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
+            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "n":
+            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
+            break;
+          case "e":
+            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
+            break;
+          case "s":
+            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "w":
+            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
+            break;
+          default:
+            break;
+        }
+
+        newWidth = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newWidth));
+        newHeight = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newHeight));
+
+        if (e.touches.length > 1) {
+          const aspect = personalizarDadosArraste.initialWidth / personalizarDadosArraste.initialHeight;
+          if (personalizarRedimensionando.includes("w") || personalizarRedimensionando.includes("e")) {
+            newHeight = newWidth / aspect;
+          } else {
+            newWidth = newHeight * aspect;
+          }
+        }
+
+        const widthRatio = newWidth / personalizarAcessorioSelecionado.width;
+        const heightRatio = newHeight / personalizarAcessorioSelecionado.height;
+
+        const newX = centerX - (centerX - personalizarAcessorioSelecionado.x) * widthRatio;
+        const newY = centerY - (centerY - personalizarAcessorioSelecionado.y) * heightRatio;
+
+        const updatedAccessory = {
+          ...personalizarAcessorioSelecionado,
+          x: newX,
+          y: newY,
+          width: newWidth,
+          height: newHeight
+        };
+
+        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
+        setPersonalizarAcessorioSelecionado(updatedAccessory);
+      } else {
+        const deltaX = offsetX - personalizarDadosArraste.startX;
+        const deltaY = offsetY - personalizarDadosArraste.startY;
+
+        const updatedAccessory = {
+          ...personalizarAcessorioSelecionado,
+          x: personalizarAcessorioSelecionado.x + deltaX,
+          y: personalizarAcessorioSelecionado.y + deltaY
+        };
+
+        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
+        setPersonalizarAcessorioSelecionado(updatedAccessory);
+
+        setPersonalizarDadosArraste(prev => ({ ...prev, startX: offsetX, startY: offsetY }));
+      }
+    }
+  };
+
+  const personalizarTouchEndCanvas = () => {
+    setPersonalizarArrastando(false);
+    setPersonalizarRedimensionando(null);
+    setPersonalizarRotacionando(false);
+    setPersonalizarTocando(false);
   };
 
   const personalizarMouseDownCanvas = (e) => {
@@ -591,16 +790,25 @@ const Personalizar = () => {
     }
   };
 
+  const personalizarRolarCarrosselMobile = (direcao) => {
+    const carousel = personalizarCarouselRef.current;
+    if (carousel) {
+      carousel.scrollBy({ left: direcao * carousel.clientWidth * 0.8, behavior: 'smooth' });
+    }
+  };
+
   const personalizarVoltar = () => {
     window.history.back();
   };
 
+  const isMobile = window.innerWidth <= 768;
+
   return (
     <div className="personalizar-container" onDragOver={personalizarArrasteSobre}>
       <div className="personalizar-gifs">
-        <img src="http://www.gigaglitters.com/created/sFJBGYZrP7.gif" width="210" height="80" alt="Clique em" />
+        <img src="http://www.gigaglitters.com/created/p3oAvyJiCF.gif" width="210" height="80" alt="Clique em" />
       <div className="personalizar-gifs2">
-        <img src="http://www.gigaglitters.com/created/PXVyXZWC72.gif" width="180" height="80" alt="um objeto" />
+        <img src="http://www.gigaglitters.com/created/8eUPtHLK8v.gif"  width="180" height="80" alt="um objeto" />
       </div>
       </div>
 
@@ -644,13 +852,17 @@ const Personalizar = () => {
             onMouseLeave={personalizarMouseUpCanvas}
             onDrop={personalizarSoltarNoCanvas}
             onDragOver={personalizarArrasteSobre}
+            onTouchStart={personalizarTouchStartCanvas}
+            onTouchMove={personalizarTouchMoveCanvas}
+            onTouchEnd={personalizarTouchEndCanvas}
+            onTouchCancel={personalizarTouchEndCanvas}
           ></canvas>
+          <button className="personalizar-botao-deletar" onClick={personalizarRemoverAcessorio} title="Deletar Objeto">
+            <FaTrash />
+          </button>
         </div>
 
         <div className="personalizar-controles">
-          <button className="personalizar-botao-deletar" onClick={personalizarRemoverAcessorio}>
-            Deletar
-          </button>
           <button className="personalizar-botao-salvar" onClick={personalizarSalvarAvatar}>
             <h1 className="personalizar-texto-botao-salvar">Salvar Macho</h1>
             <img src="/images/diamante.png" alt="Diamante" className="personalizar-icone-diamante" />
@@ -667,9 +879,12 @@ const Personalizar = () => {
             <div className={`personalizar-aba ${personalizarAbaAtual === 'chapeus' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('chapeus')}>Chapeus</div>
             <div className={`personalizar-aba ${personalizarAbaAtual === 'adds' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('adds')}>Adds</div>
           </div>
+          {isMobile && <FaArrowRight className="personalizar-seta-deslizar" />}
         </div>
 
-        <div className="personalizar-seta" id="personalizar-seta-anterior" onClick={() => personalizarRolarCarrossel(-1)}>↑</div>
+        <div className="personalizar-seta" id="personalizar-seta-anterior" onClick={isMobile ? () => personalizarRolarCarrosselMobile(-1) : () => personalizarRolarCarrossel(-1)}>
+          {isMobile ? '←' : '↑'}
+        </div>
 
         <div
           className="personalizar-carrossel"
@@ -691,7 +906,9 @@ const Personalizar = () => {
           ))}
         </div>
 
-        <div className="personalizar-seta" id="personalizar-seta-proxima" onClick={() => personalizarRolarCarrossel(1)}>↓</div>
+        <div className="personalizar-seta" id="personalizar-seta-proxima" onClick={isMobile ? () => personalizarRolarCarrosselMobile(1) : () => personalizarRolarCarrossel(1)}>
+          {isMobile ? '→' : '↓'}
+        </div>
       </div>
     </div>
   );

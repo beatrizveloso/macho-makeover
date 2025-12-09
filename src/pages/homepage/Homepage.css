@@ -48,6 +48,7 @@
     width: 440px;
     background: none;
     text-align: center;
+    color: black;
 }
 
 .homepage-button {
@@ -142,7 +143,7 @@
 
 @media (max-width: 480px) and (orientation: portrait) {
     .homepage-body {
-        background-image: url('../images/celular2.png');
+        background-image: url('../images/celular.png');
     }
 
     .homepage-paragraph {
@@ -160,7 +161,7 @@
 
 @media (max-width: 480px) and (orientation: landscape) {
     .homepage-body {
-        background-image: url('../images/celular2.png');
+        background-image: url('../images/celular.png');
     }
 
     .homepage-paragraph {
