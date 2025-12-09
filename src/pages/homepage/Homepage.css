@@ -68,7 +68,6 @@
     height: auto;
     width: 55px;
     height: 50px;
-    padding-top: 0px;
     padding-left: 5px;
     background: none;
 }
@@ -76,6 +75,7 @@
 .homepage-heading {
     font-size: 20px;
     background: none;
+    margin-top: 13px;
     padding-left: 25px;
     color: rgb(0, 0, 0);
 }
@@ -118,16 +118,57 @@
     font-size: 16px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .homepage-paragraph {
+        margin-top: 40px;
+        font-size: 14px;
+        width: 350px;
+    }
+
+    .homepage-button {
+        width: 250px;
+        height: 70px;
+    }
+
+    .homepage-button img{
+        width: 45px;
+        height: 40px;
+    }
+
+    .homepage-heading {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
     .homepage-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
         background-image: url('../images/celular2.png');
     }
 
     .homepage-paragraph {
-        display: none;
+        font-size: 17px;
+        margin-top: -500px;
+        margin-left: 165px;
+        width: 290px;
+        color: black;
+    }
+
+    .homepage-button {
+        margin-left: 155px;
+    }
+}
+
+@media (max-width: 480px) and (orientation: landscape) {
+    .homepage-body {
+        background-image: url('../images/celular2.png');
+    }
+
+    .homepage-paragraph {
+        font-size: 14px;
+        width: 250px;
+    }
+
+    .homepage-button {
+        margin-top: 180px;
     }
 }

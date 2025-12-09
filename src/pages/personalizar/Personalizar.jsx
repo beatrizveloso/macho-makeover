@@ -56,7 +56,6 @@ const Personalizar = () => {
     img.src = personagemSelecionado || '/images/character.png';
     img.onload = () => setPersonalizarImagemPersonagem(img);
     img.onerror = () => {
-      // fallback
       const fallback = new Image();
       fallback.src = '/images/character.png';
       fallback.onload = () => setPersonalizarImagemPersonagem(fallback);
@@ -100,7 +99,6 @@ const Personalizar = () => {
       ctx.drawImage(img, -width / 2, -height / 2, width, height);
 
       if (personalizarAcessorioSelecionado && personalizarAcessorioSelecionado.id === acessorio.id) {
-      
         ctx.strokeStyle = "rgba(148, 1, 104, 0.9)";
         ctx.lineWidth = 2;
         ctx.strokeRect(-width / 2, -height / 2, width, height);
@@ -136,7 +134,7 @@ const Personalizar = () => {
           const rh = calcRotHandle(width/2, height/2, c.x, c.y, PERSONALIZAR_DISTANCIA_ALCA_ROTACAO);
           ctx.save();
           ctx.beginPath();
-        ctx.fillStyle = "rgba(220, 220, 220, 0.56)";
+          ctx.fillStyle = "rgba(220, 220, 220, 0.56)";
           ctx.arc(rh.x, rh.y, PERSONALIZAR_TAMANHO_ALCA, 0, Math.PI * 2);
           ctx.fill();
 
@@ -156,7 +154,7 @@ const Personalizar = () => {
   const globalParaLocal = (x, y, acc) => {
     const centerX = acc.x + acc.width / 2;
     const centerY = acc.y + acc.height / 2;
-    const angle = -acc.angle * Math.PI / 180; 
+    const angle = -acc.angle * Math.PI / 180;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
     const dx = x - centerX;
@@ -488,21 +486,28 @@ const Personalizar = () => {
       }
     };
   };
+
   const personalizarSalvarAvatar = () => {
     const canvas = personalizarCanvasRef.current;
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
-    link.download = "macho-makeover-avatar.png";
+    link.download = "macho.png";
     link.click();
   };
 
   const personalizarClicarAba = (categoria) => setPersonalizarAbaAtual(categoria);
   const personalizarAlternarPainel = () => setPersonalizarPainelRecolhido(!personalizarPainelRecolhido);
 
-  const personalizarTeclaPressionada = (e) => {
-    if (e.key === "Delete" && personalizarAcessorioSelecionado) {
+  const personalizarRemoverAcessorio = () => {
+    if (personalizarAcessorioSelecionado) {
       setPersonalizarImagensAcessorios(prev => prev.filter(acc => acc.id !== personalizarAcessorioSelecionado.id));
       setPersonalizarAcessorioSelecionado(null);
+    }
+  };
+
+  const personalizarTeclaPressionada = (e) => {
+    if (e.key === "Delete" && personalizarAcessorioSelecionado) {
+      personalizarRemoverAcessorio();
       return;
     }
     if (!personalizarAcessorioSelecionado) return;
@@ -586,8 +591,19 @@ const Personalizar = () => {
     }
   };
 
+  const personalizarVoltar = () => {
+    window.history.back();
+  };
+
   return (
     <div className="personalizar-container" onDragOver={personalizarArrasteSobre}>
+      <div className="personalizar-gifs">
+        <img src="http://www.gigaglitters.com/created/sFJBGYZrP7.gif" width="210" height="80" alt="Clique em" />
+      <div className="personalizar-gifs2">
+        <img src="http://www.gigaglitters.com/created/PXVyXZWC72.gif" width="180" height="80" alt="um objeto" />
+      </div>
+      </div>
+
       <div
         id="personalizar-painel-camadas"
         ref={personalizarLayersPanelRef}
@@ -631,7 +647,10 @@ const Personalizar = () => {
           ></canvas>
         </div>
 
-        <div className="personalizar-salvar">
+        <div className="personalizar-controles">
+          <button className="personalizar-botao-deletar" onClick={personalizarRemoverAcessorio}>
+            Deletar
+          </button>
           <button className="personalizar-botao-salvar" onClick={personalizarSalvarAvatar}>
             <h1 className="personalizar-texto-botao-salvar">Salvar Macho</h1>
             <img src="/images/diamante.png" alt="Diamante" className="personalizar-icone-diamante" />

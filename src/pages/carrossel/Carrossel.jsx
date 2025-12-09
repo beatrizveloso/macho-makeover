@@ -182,12 +182,11 @@ const Carrossel = () => {
 
   return (
     <div className="carrossel-container">
+      {carrosselPaginaAtual === 'carrossel' && (
+        <button className="personalizar-botao-voltar" onClick={carrosselVoltarCategorias}></button>
+      )}
+
       <div className="carrossel-cabecalho">
-        {carrosselPaginaAtual === 'carrossel' && (
-          <button className="carrossel-botao-voltar" onClick={carrosselVoltarCategorias}>
-            <FaArrowLeft /> Voltar
-          </button>
-        )}
         <div className="carrossel-texto">
           {carrosselPaginaAtual === 'categorias' ? (
             <>

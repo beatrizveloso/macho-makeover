@@ -1,3 +1,21 @@
+.personalizar-botao-voltar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 160px;
+  height: 55px;
+  border-radius: 50px;
+  background: url('/images/button-voltar.png') center/contain no-repeat;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.personalizar-botao-voltar:hover {
+  transform: scale(1.05);
+}
+
 .carrossel-container {
   display: flex;
   flex-direction: column;
@@ -10,6 +28,7 @@
   background-repeat: no-repeat;
   height: 100vh;
   padding: 20px;
+  position: relative;
 }
 
 .carrossel-cabecalho {
@@ -21,27 +40,6 @@
   margin-top: 10px;
   margin-bottom: 30px;
   height: 120px;
-}
-
-.carrossel-botao-voltar {
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #f3c5dc;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  z-index: 10;
-}
-
-.carrossel-botao-voltar:hover {
-  color: #ff66b2;
 }
 
 .carrossel-texto {
@@ -69,6 +67,7 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
+  justify-content: center;
 }
 
 .carrossel-categorias {
@@ -76,7 +75,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 15px;
-  margin-top: 100px;
+  margin-top: 20px;
   margin-bottom: 30px;
   max-width: 990px;
 }
@@ -170,11 +169,13 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
+  justify-content: center;
+  margin-top: -120px;
 }
 
 .carrossel-titulo-categoria {
   font-size: 24px;
-  margin-bottom: 20px;
+  padding-bottom: 40px;
   color: #333;
   text-align: center;
   color: #f3c5dc;
@@ -186,7 +187,9 @@
   width: 80%;
   height: 300px;
   perspective: 1200px;
-  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carrossel-track {
@@ -253,15 +256,17 @@
 }
 
 .carrossel-botao-container {
-  margin-top: 30px;
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
-  margin-bottom: 30px;
+  z-index: 100;
 }
 
 .carrossel-botao-confirmar {
   text-decoration: none;
-  margin-top: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,21 +337,17 @@
   background-color: #7a0132;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 481px) and (max-width: 1024px) {
+  .personalizar-botao-voltar {
+    width: 140px;
+    height: 50px;
+    top: 15px;
+    left: 15px;
+  }
+
   .carrossel-cabecalho {
     height: 100px;
     margin-bottom: 20px;
-  }
-
-  .carrossel-botao-voltar {
-    position: relative;
-    left: 0;
-    top: 0;
-    transform: none;
-    margin-right: 10px;
-    justify-content: flex-start;
-    padding: 8px 15px;
-    font-size: 16px;
   }
 
   .carrossel-texto {
@@ -355,33 +356,162 @@
   }
 
   .carrossel-um img {
-    width: 300px;
-    height: 60px;
+    width: 350px;
+    height: 70px;
     margin-bottom: 5px;
   }
 
   .carrossel-dois img {
-    width: 160px;
-    height: 60px;
+    width: 200px;
+    height: 70px;
+  }
+
+  .carrossel-pagina-categorias {
+    margin-top: 40px;
   }
 
   .carrossel-categorias {
-    max-width: 90%;
+    margin-top: 40px;
+    max-width: 95%;
+    gap: 12px;
   }
 
   .carrossel-botao-categoria {
-    width: 200px;
-    height: 60px;
-    font-size: 14px;
+    width: 280px;
+    height: 75px;
+    font-size: 15px;
+  }
+
+  .carrossel-pagina-carrossel {
+    padding-bottom: 100px;
   }
 
   .carrossel-carrossel {
-    width: 95%;
-    height: 250px;
+    width: 90%;
+    height: 280px;
+    margin-top: 40px;
   }
 
   .carrossel-controles {
-    padding: 0 10px;
+    padding: 0 15px;
+  }
+
+  .carrossel-botao-navegacao {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  .carrossel-item {
+    height: 95%;
+  }
+
+  .carrossel-botao-container {
+    bottom: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .personalizar-botao-voltar {
+    width: 140px; 
+    height: 50px; 
+    top: 15px;
+    left: 15px;
+  }
+
+  .carrossel-container {
+    padding: 15px;
+    justify-content: flex-start;
+  }
+
+  .carrossel-cabecalho {
+    flex-direction: column;
+    height: auto;
+    gap: 10px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+  }
+
+  .carrossel-texto {
+    flex-direction: column;
+    margin-left: 0;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .carrossel-texto img {
+    margin-left: 0;
+  }
+
+  .carrossel-um img,
+  .carrossel-dois img {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .carrossel-um {
+    margin-bottom: 5px;
+  }
+
+  .carrossel-pagina-categorias {
+    justify-content: center;
+    margin-top: 10px;
+    flex: 1;
+  }
+
+  .carrossel-categorias {
+    margin-top: 20px;
+    max-width: 65%;
+    gap: 10px;
+    width: 100%; 
+  }
+
+  .carrossel-botao-categoria {
+    width: 100%;
+    max-width: none; 
+    height: 70px; 
+    font-size: 14px;
+    background-size: 95% !important;
+  }
+
+  .carrossel-pagina-carrossel {
+    width: 100%;
+    padding-bottom: 100px;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .carrossel-titulo-categoria {
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
+
+  .carrossel-carrossel {
+    width: 100%;
+    height: 250px;
+    perspective: 800px;
+    margin: 0;
+  }
+
+  .carrossel-track {
+    transform: translateZ(-200px);
+  }
+
+  .carrossel-item {
+    height: 90%; 
+  }
+
+  .carrossel-item img {
+    width: auto;
+    max-width: 180px; 
+    height: 100%;
+  }
+
+  .carrossel-controles {
+    padding: 0 5px;
   }
 
   .carrossel-botao-navegacao {
@@ -389,37 +519,143 @@
     height: 40px;
     font-size: 16px;
   }
+
+  .carrossel-botao-container {
+    position: fixed;
+    top: 790px;
+    left: 0;
+    right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .carrossel-botao-confirmar {
+    width: 250px;
+    height: 70px;
+  }
+
+  .carrossel-botao-confirmar h1 {
+    font-size: 18px;
+  }
+
+  .carrossel-botao-confirmar img {
+    width: 40px;
+  }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) and (orientation: portrait) {
+  .personalizar-botao-voltar {
+    width: 190px;
+    height: 55px;
+  }
+
   .carrossel-cabecalho {
-    flex-direction: column;
-    height: auto;
-    gap: 10px;
     margin-bottom: 15px;
   }
 
-  .carrossel-botao-voltar {
-    align-self: flex-start;
-    margin: 0 0 10px 0;
-  }
-
   .carrossel-um img {
-    width: 250px;
-    height: 50px;
-  }
-
-  .carrossel-dois img {
-    width: 130px;
-    height: 50px;
-  }
-
-  .carrossel-botao-categoria {
-    width: 90%;
     max-width: 250px;
   }
 
+  .carrossel-dois img {
+    max-width: 160px;
+  }
+
   .carrossel-carrossel {
-    height: 200px;
+    height: 260px; 
+  }
+
+  .carrossel-item img {
+    max-width: 200px; 
+  }
+
+  .carrossel-botao-categoria {
+    height: 65px; 
+    max-width: none; 
+    width: 100%;
+  }
+
+  .carrossel-botao-container {
+    bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) and (orientation: landscape) {
+  .personalizar-botao-voltar {
+    width: 110px;
+    height: 35px;
+    top: 10px;
+    left: 10px;
+  }
+
+  .carrossel-container {
+    height: auto;
+    min-height: 100vh;
+    padding: 10px;
+  }
+
+  .carrossel-cabecalho {
+    flex-direction: row;
+    height: 60px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+  }
+
+  .carrossel-texto {
+    flex-direction: row;
+    gap: 5px;
+    margin-top: 0;
+  }
+
+  .carrossel-um img,
+  .carrossel-dois img {
+    max-width: 180px;
+    height: 40px;
+  }
+
+  .carrossel-um {
+    margin-bottom: 0;
+  }
+
+  .carrossel-pagina-categorias {
+    margin-top: 5px;
+  }
+
+  .carrossel-categorias {
+    margin-top: 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 180px;
+    overflow-y: auto;
+    gap: 8px;
+  }
+
+  .carrossel-botao-categoria {
+    width: 45%;
+    max-width: none;
+    height: 55px;
+    background-size: 90% !important;
+  }
+
+  .carrossel-pagina-carrossel {
+    padding-bottom: 80px;
+  }
+
+  .carrossel-carrossel {
+    height: 180px;
+    margin-top: 10px;
+  }
+
+  .carrossel-item img {
+    max-width: 120px;
+  }
+
+  .carrossel-botao-container {
+    bottom: 10px;
+  }
+
+  .carrossel-botao-confirmar {
+    width: 220px;
+    height: 60px;
   }
 }
