@@ -37,7 +37,6 @@ const carrosselCategorias = {
       { src: "/images/personagens/christian-grey.png", alt: "Christian Grey" },
       { src: "/images/personagens/leo-dicaprio.png", alt: "Leonardo DiCaprio" },
       { src: "/images/personagens/robert-pattinson.png", alt: "Robert Pattinson" },
-
       { src: "/images/personagens/pedro-novaes.png", alt: "Pedro Novaes" },
       { src: "/images/personagens/brad-pitt.png", alt: "Brad Pitt" },
       { src: "/images/personagens/king-caspian.png", alt: "Rei Caspian" },
@@ -60,14 +59,14 @@ const carrosselCategorias = {
   cantores: {
     titulo: "Cantores/Ícones da Música",
     itens: [
-      { src: "/images/personagens/harry-styles.png", alt: "Harry Styles" },
-      { src: "/images/personagens/justin_bieber.png", alt: "Justin Bieber" },
+      { src: "/images/personagens/justin-bieber.png", alt: "Justin Bieber" },
+      { src: "/images/personagens/shawn-mendes.png", alt: "Shawn Mendes" },
       { src: "/images/personagens/jungkook.png", alt: "Jungkook" },
-      { src: "/images/personagens/ed-sheeran.png", alt: "Ed Sheeran" },
-      { src: "/images/personagens/shawn_mendes.png", alt: "Shawn Mendes" },
+      { src: "/images/personagens/harry-styles.png", alt: "Harry Styles" },
+      { src: "/images/personagens/bruno-mars.png", alt: "Bruno Mars" },
       { src: "/images/personagens/henrique.png", alt: "Henrique" },
-      { src: "/images/personagens/chico_buarque.png", alt: "Chico Buarque" },
-      { src: "/images/personagens/david_bowie.png", alt: "David Bowie" }
+      { src: "/images/personagens/chico-buarque.png", alt: "Chico Buarque" },
+      { src: "/images/personagens/david-bowie.png", alt: "David Bowie" }
     ]
   },
   series: {
@@ -77,8 +76,8 @@ const carrosselCategorias = {
       { src: "/images/personagens/benedict-brigerton.png", alt: "Benedict Bridgerton" },
       { src: "/images/personagens/dean-winchester.png", alt: "Dean Winchester" },
       { src: "/images/personagens/sam-winchester.png", alt: "Sam Winchester" },
-      { src: "/images/personagens/armani.png", alt: "Armani" },
-      { src: "/images/personagens/george-weasley.png", alt: "George Weasley" },
+      { src: "/images/personagens/profeta.png", alt: "Profeta" },
+      { src: "/images/personagens/fred-weasley.png", alt: "Fred Weasley" },
       { src: "/images/personagens/javier-pena.png", alt: "Javier Peña" },
       { src: "/images/personagens/marcus-lopez.png", alt: "Marcus Lopez" }
     ]
