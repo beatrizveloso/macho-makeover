@@ -8,39 +8,40 @@ const carrosselCategorias = {
     titulo: "Filmes de Ação",
     itens: [
       { src: "/images/personagens/capitao-nasc.png", alt: "Capitão Nascimento" },
-      { src: "/images/personagens/rambo.png", alt: "Rambo" },
-      { src: "/images/personagens/john_wick.png", alt: "John Wick" },
+      { src: "/images/personagens/jake-sully.png", alt: "Jake Sully" },
+      { src: "/images/personagens/john-wick.png", alt: "John Wick" },
       { src: "/images/personagens/dom-toretto.png", alt: "Dom Toretto" },
       { src: "/images/personagens/ethan-hunt.png", alt: "Ethan Hunt" },
-      { src: "/images/personagens/jack-reacher.png", alt: "Jack Reacher" },
-      { src: "/images/personagens/mad-max.png", alt: "Max Rockatansky" },
-      { src: "/images/personagens/the_rock_base.png", alt: "The Rock" }
+      { src: "/images/personagens/thomas-maze.png", alt: "Thomas Maze" },
+      { src: "/images/personagens/james-bond.png", alt: "James Bond" },
+      { src: "/images/personagens/the-rock.png", alt: "The Rock" }
     ]
   },
   superHerois: {
     titulo: "Super-Heróis",
     itens: [
-      { src: "/images/personagens/batman.png", alt: "Batman" },
-      { src: "/images/personagens/thor_base.png", alt: "Thor" },
       { src: "/images/personagens/capitao-america.png", alt: "Capitão América" },
+      { src: "/images/personagens/thor.png", alt: "Thor" },
       { src: "/images/personagens/homem-de-ferro.png", alt: "Homem de Ferro" },
       { src: "/images/personagens/homem-aranha.png", alt: "Homem-Aranha" },
       { src: "/images/personagens/superman.png", alt: "Superman" },
-      { src: "/images/personagens/bucky.png", alt: "Bucky" },
-      { src: "/images/personagens/pantera-negra.png", alt: "Pantera Negra" }
+      { src: "/images/personagens/batman.png", alt: "Batman" },
+      { src: "/images/personagens/flash.png", alt: "Flash" },
+      { src: "/images/personagens/shazam.png", alt: "Shazam" }
     ]
   },
   galaoCinema: {
     titulo: "Galãs do Cinema",
     itens: [
       { src: "/images/personagens/thimothee.png", alt: "Thimothee" },
-      { src: "/images/personagens/damon-salvatore.png", alt: "Damon Salvatore" },
-      { src: "/images/personagens/leo_dicaprio.png", alt: "Leonardo DiCaprio" },
+      { src: "/images/personagens/christian-grey.png", alt: "Christian Grey" },
+      { src: "/images/personagens/leo-dicaprio.png", alt: "Leonardo DiCaprio" },
       { src: "/images/personagens/robert-pattinson.png", alt: "Robert Pattinson" },
+
       { src: "/images/personagens/pedro-novaes.png", alt: "Pedro Novaes" },
       { src: "/images/personagens/brad-pitt.png", alt: "Brad Pitt" },
       { src: "/images/personagens/king-caspian.png", alt: "Rei Caspian" },
-      { src: "/images/personagens/johnny_depp.png", alt: "Johnny Depp" }
+      { src: "/images/personagens/johnny-depp.png", alt: "Johnny Depp" }
     ]
   },
   jogos: {
@@ -85,9 +86,9 @@ const carrosselCategorias = {
   galaoFeios: {
     titulo: "Galãs Feios",
     itens: [
+      { src: "/images/personagens/wagner-moura.png", alt: "Wagner Moura" },
       { src: "/images/personagens/ronaldo.png", alt: "Ronaldo" },
       { src: "/images/personagens/pedro-pascal.png", alt: "Pedro Pascal" },
-      { src: "/images/personagens/wagner-moura.png", alt: "Wagner Moura" },
       { src: "/images/personagens/tom-hiddleston.png", alt: "Tom-Hiddleston" },
       { src: "/images/personagens/hugh-jackman.png", alt: "Hugh Jackman" },
       { src: "/images/personagens/rodrigo-simas.png", alt: "Rodrigo Simas" },
