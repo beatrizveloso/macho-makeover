@@ -90,22 +90,22 @@ const carrosselCategorias = {
       { src: "/images/personagens/pedro-pascal.png", alt: "Pedro Pascal" },
       { src: "/images/personagens/tom-hiddleston.png", alt: "Tom-Hiddleston" },
       { src: "/images/personagens/hugh-jackman.png", alt: "Hugh Jackman" },
-      { src: "/images/personagens/rodrigo-simas.png", alt: "Rodrigo Simas" },
-      { src: "/images/personagens/jesuita-barbosa.png", alt: "Jesuita Barbosa" },
+      { src: "/images/personagens/chay-suede.png", alt: "Chay Suede" },
+      { src: "/images/personagens/selton-melo.png", alt: "Selton Melo" },
       { src: "/images/personagens/ryan-gosling.png", alt: "Ryan Gossling" }
     ]
   },
   viloes: {
     titulo: "Vilões/Anti Heróis",
     itens: [
-      { src: "/images/personagens/deadpool.png", alt: "Deadpool" },
       { src: "/images/personagens/draco-malfoy.png", alt: "Draco Malfoy" },
+      { src: "/images/personagens/rafe-cameron.png", alt: "Rafe Cameron" },
       { src: "/images/personagens/coringa.png", alt: "Coringa" },
-      { src: "/images/personagens/hans.png", alt: "Hans" },
-      { src: "/images/personagens/tommy_shelby.png", alt: "Tommy Shelby" },
+      { src: "/images/personagens/tommy-shelby.png", alt: "Tommy Shelby" },
       { src: "/images/personagens/loki.png", alt: "Loki" },
       { src: "/images/personagens/wolverine.png", alt: "Wolverine" },
-      { src: "/images/personagens/jack-sparrow.png", alt: "Jack Sparrow" }
+      { src: "/images/personagens/jack-sparrow.png", alt: "Jack Sparrow" },
+      { src: "/images/personagens/tom-riddle.png", alt: "Tom Riddle" }
     ]
   },
   desenhos: {
@@ -114,11 +114,11 @@ const carrosselCategorias = {
       { src: "/images/personagens/jack-frost.png", alt: "Jack Frost" },
       { src: "/images/personagens/jose-bezerra.png", alt: "José Bezerra" },
       { src: "/images/personagens/soluço.png", alt: "Soluço" },
-      { src: "/images/personagens/ben10.png", alt: "Ben 10" },
+      { src: "/images/personagens/principe-eric.png", alt: "Principe Eric" },
       { src: "/images/personagens/raposa-zoo.png", alt: "Raposa do Zootopia" },
-      { src: "/images/personagens/croods.png", alt: "Personagem dos Croods" },
-      { src: "/images/personagens/ratatouille.png", alt: "Remy (Ratatouille)" },
-      { src: "/images/personagens/detona-ralph.png", alt: "Detona Ralph" }
+      { src: "/images/personagens/kristoff.png", alt: "Kristoff" },
+      { src: "/images/personagens/johnny-ht.png", alt: "Johnny HT" },
+      { src: "/images/personagens/tadashi.png", alt: "Tadashi" }
     ]
   }
 };
