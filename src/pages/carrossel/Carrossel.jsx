@@ -75,11 +75,11 @@ const carrosselCategorias = {
       { src: "/images/personagens/anthony-brigerton.png", alt: "Anthony Bridgerton" },
       { src: "/images/personagens/benedict-brigerton.png", alt: "Benedict Bridgerton" },
       { src: "/images/personagens/dean-winchester.png", alt: "Dean Winchester" },
-      { src: "/images/personagens/sam-winchester.png", alt: "Sam Winchester" },
+      { src: "/images/personagens/steve-harrington.png", alt: "Steve Harrington" },
       { src: "/images/personagens/profeta.png", alt: "Profeta" },
       { src: "/images/personagens/fred-weasley.png", alt: "Fred Weasley" },
       { src: "/images/personagens/javier-pena.png", alt: "Javier Peña" },
-      { src: "/images/personagens/marcus-lopez.png", alt: "Marcus Lopez" }
+      { src: "/images/personagens/eddie-munson.png", alt: "Eddie Munson" }
     ]
   },
   galaoFeios: {

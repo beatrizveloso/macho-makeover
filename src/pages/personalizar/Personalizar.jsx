@@ -8,7 +8,7 @@ const PERSONALIZAR_TAMANHO_MINIMO = 30;
 const PERSONALIZAR_TAMANHO_MAXIMO = 800;
 
 const personalizarItens = {
-  cabelos: Array.from({ length: 50 }, (_, i) => `/images/cabelos/cabelo${i + 1}.png`),
+  cabelos: Array.from({ length: 53 }, (_, i) => `/images/cabelos/cabelo${i + 1}.png`),
   oculos: Array.from({ length: 50 }, (_, i) => `/images/oculos/oculos${i + 1}.png`),
   colares: [
     ...Array.from({ length: 40 }, (_, i) => `/images/colares/colar${i + 1}.png`),
@@ -16,8 +16,8 @@ const personalizarItens = {
   ],
   chapeus: Array.from({ length: 50 }, (_, i) => `/images/chapeus/chapeu${i + 1}.png`),
   adds: [
-    ...Array.from({ length: 31 }, (_, i) => `/images/adds/add${i + 1}.png`),
-    ...Array.from({ length: 10 }, (_, i) => `/images/adds/bolsa${i + 1}.png`)
+    ...Array.from({ length: 36 }, (_, i) => `/images/adds/add${i + 1}.png`),
+    ...Array.from({ length: 12 }, (_, i) => `/images/adds/bolsa${i + 1}.png`)
   ]
 };
 
