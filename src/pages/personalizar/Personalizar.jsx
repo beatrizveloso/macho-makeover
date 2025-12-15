@@ -36,21 +36,34 @@ const Personalizar = () => {
   const personalizarCanvasRef = useRef(null);
   const personalizarCarouselRef = useRef(null);
   const personalizarLayersPanelRef = useRef(null);
+  const touchStateRef = useRef({
+    isDragging: false,
+    isResizing: false,
+    isRotating: false,
+    startX: 0,
+    startY: 0,
+    lastTapTime: 0,
+    selectedAccessory: null,
+    touchIdentifier: null
+  });
 
   const [personalizarImagemPersonagem, setPersonalizarImagemPersonagem] = useState(null);
   const [personalizarImagensAcessorios, setPersonalizarImagensAcessorios] = useState([]);
   const [personalizarAcessorioSelecionado, setPersonalizarAcessorioSelecionado] = useState(null);
   const [personalizarAbaAtual, setPersonalizarAbaAtual] = useState('cabelos');
   const [personalizarPainelRecolhido, setPersonalizarPainelRecolhido] = useState(false);
-  const [personalizarArrastando, setPersonalizarArrastando] = useState(false);
-  const [personalizarRedimensionando, setPersonalizarRedimensionando] = useState(null);
-  const [personalizarRotacionando, setPersonalizarRotacionando] = useState(false);
-  const [personalizarDadosArraste, setPersonalizarDadosArraste] = useState({
-    startX: 0, startY: 0, initialWidth: 0, initialHeight: 0, initialAngle: 0, initialMouseAngle: 0
-  });
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [isCarouselSwiping, setIsCarouselSwiping] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const personagemSelecionado = localStorage.getItem('carrosselPersonagemSelecionado');
@@ -67,14 +80,6 @@ const Personalizar = () => {
   useEffect(() => {
     personalizarDesenharPersonagemEAcessorios();
   }, [personalizarImagemPersonagem, personalizarImagensAcessorios, personalizarAcessorioSelecionado]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const personalizarDesenharPersonagemEAcessorios = () => {
     const canvas = personalizarCanvasRef.current;
@@ -289,202 +294,190 @@ const Personalizar = () => {
     const offsetX = touch.clientX - rect.left;
     const offsetY = touch.clientY - rect.top;
 
+    const currentTime = Date.now();
     const clickedAccessory = personalizarObterAcessorioNaPosicao(offsetX, offsetY);
     
     if (clickedAccessory) {
       const control = personalizarDetectarControle(offsetX, offsetY, clickedAccessory);
       setPersonalizarAcessorioSelecionado(clickedAccessory);
+      
+      touchStateRef.current = {
+        ...touchStateRef.current,
+        startX: offsetX,
+        startY: offsetY,
+        selectedAccessory: clickedAccessory,
+        touchIdentifier: touch.identifier,
+        initialWidth: clickedAccessory.width,
+        initialHeight: clickedAccessory.height,
+        initialAngle: clickedAccessory.angle || 0
+      };
 
       if (control) {
         if (control.type === 'rotate') {
-          setPersonalizarRotacionando(true);
+          touchStateRef.current.isRotating = true;
           const centerX = clickedAccessory.x + clickedAccessory.width / 2;
           const centerY = clickedAccessory.y + clickedAccessory.height / 2;
-          const initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
-          setPersonalizarDadosArraste({
-            startX: offsetX,
-            startY: offsetY,
-            initialWidth: clickedAccessory.width,
-            initialHeight: clickedAccessory.height,
-            initialAngle: clickedAccessory.angle || 0,
-            initialMouseAngle
-          });
-          return;
+          touchStateRef.current.initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
         } else if (control.type === 'resize') {
-          setPersonalizarRedimensionando(control.corner);
-          setPersonalizarArrastando(true);
-          setPersonalizarDadosArraste({
-            startX: offsetX,
-            startY: offsetY,
-            initialWidth: clickedAccessory.width,
-            initialHeight: clickedAccessory.height,
-            initialAngle: clickedAccessory.angle || 0,
-            initialMouseAngle: 0
-          });
-          return;
+          touchStateRef.current.isResizing = true;
+          touchStateRef.current.resizeCorner = control.corner;
         } else if (control.type === 'move') {
-          setPersonalizarArrastando(true);
-          setPersonalizarDadosArraste({
-            startX: offsetX,
-            startY: offsetY,
-            initialWidth: clickedAccessory.width,
-            initialHeight: clickedAccessory.height,
-            initialAngle: clickedAccessory.angle || 0,
-            initialMouseAngle: 0
-          });
-          return;
+          touchStateRef.current.isDragging = true;
         }
       } else {
-        setPersonalizarArrastando(true);
-        setPersonalizarDadosArraste({
-          startX: offsetX,
-          startY: offsetY,
-          initialWidth: clickedAccessory.width,
-          initialHeight: clickedAccessory.height,
-          initialAngle: clickedAccessory.angle || 0,
-          initialMouseAngle: 0
-        });
-        return;
+        touchStateRef.current.isDragging = true;
+      }
+      
+      if (currentTime - touchStateRef.current.lastTapTime < 300 && 
+          personalizarAcessorioSelecionado?.id === clickedAccessory.id) {
+        touchStateRef.current.lastTapTime = 0;
+      } else {
+        touchStateRef.current.lastTapTime = currentTime;
       }
     } else {
       setPersonalizarAcessorioSelecionado(null);
+      touchStateRef.current.selectedAccessory = null;
+      touchStateRef.current.lastTapTime = currentTime;
     }
-
-    setPersonalizarDadosArraste({
-      startX: offsetX,
-      startY: offsetY,
-      initialWidth: 0,
-      initialHeight: 0,
-      initialAngle: 0,
-      initialMouseAngle: 0
-    });
   };
 
   const handleCanvasTouchMove = (e) => {
     e.preventDefault();
-    
-    if (!personalizarAcessorioSelecionado) return;
-
     const canvas = personalizarCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
+    
+    const touch = Array.from(e.touches).find(t => t.identifier === touchStateRef.current.touchIdentifier);
+    if (!touch) return;
+    
     const offsetX = touch.clientX - rect.left;
     const offsetY = touch.clientY - rect.top;
 
-    if (personalizarRotacionando) {
-      const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
-      const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
+    const { selectedAccessory, isDragging, isResizing, isRotating, resizeCorner } = touchStateRef.current;
+    
+    if (!selectedAccessory || (!isDragging && !isResizing && !isRotating)) return;
+
+    if (isRotating) {
+      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
       const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
-      const newAngle = personalizarDadosArraste.initialAngle + (newMouseAngle - personalizarDadosArraste.initialMouseAngle);
+      const newAngle = touchStateRef.current.initialAngle + (newMouseAngle - touchStateRef.current.initialMouseAngle);
       const updatedAccessory = {
-        ...personalizarAcessorioSelecionado,
+        ...selectedAccessory,
         angle: ((newAngle % 360) + 360) % 360
       };
-      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === selectedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
-      setPersonalizarDadosArraste(prev => ({ ...prev, startX: offsetX, startY: offsetY }));
+      touchStateRef.current.selectedAccessory = updatedAccessory;
       return;
     }
 
-    if (personalizarArrastando) {
-      if (personalizarRedimensionando) {
-        const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
-        const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
-        const angle = -(personalizarAcessorioSelecionado.angle || 0) * Math.PI / 180;
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-     
-        const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
-        const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
-        const startLocalX = (personalizarDadosArraste.startX - centerX) * cos - (personalizarDadosArraste.startY - centerY) * sin;
-        const startLocalY = (personalizarDadosArraste.startX - centerX) * sin + (personalizarDadosArraste.startY - centerY) * cos;
+    if (isResizing) {
+      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
+      const angle = -(selectedAccessory.angle || 0) * Math.PI / 180;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+   
+      const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
+      const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
+      const startLocalX = (touchStateRef.current.startX - centerX) * cos - (touchStateRef.current.startY - centerY) * sin;
+      const startLocalY = (touchStateRef.current.startX - centerX) * sin + (touchStateRef.current.startY - centerY) * cos;
 
-        let newWidth = personalizarDadosArraste.initialWidth;
-        let newHeight = personalizarDadosArraste.initialHeight;
+      let newWidth = touchStateRef.current.initialWidth;
+      let newHeight = touchStateRef.current.initialHeight;
 
-        switch(personalizarRedimensionando) {
-          case "nw":
-            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
-            break;
-          case "ne":
-            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
-            break;
-          case "sw":
-            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
-            break;
-          case "se":
-            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
-            break;
-          case "n":
-            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
-            break;
-          case "e":
-            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
-            break;
-          case "s":
-            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
-            break;
-          case "w":
-            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
-            break;
-          default:
-            break;
-        }
-
-        newWidth = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newWidth));
-        newHeight = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newHeight));
-
-        if (e.touches.length > 1) {
-          const aspect = personalizarDadosArraste.initialWidth / personalizarDadosArraste.initialHeight;
-          if (personalizarRedimensionando.includes("w") || personalizarRedimensionando.includes("e")) {
-            newHeight = newWidth / aspect;
-          } else {
-            newWidth = newHeight * aspect;
-          }
-        }
-
-        const widthRatio = newWidth / personalizarAcessorioSelecionado.width;
-        const heightRatio = newHeight / personalizarAcessorioSelecionado.height;
-
-        const newX = centerX - (centerX - personalizarAcessorioSelecionado.x) * widthRatio;
-        const newY = centerY - (centerY - personalizarAcessorioSelecionado.y) * heightRatio;
-
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          x: newX,
-          y: newY,
-          width: newWidth,
-          height: newHeight
-        };
-
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      } else {
-        const deltaX = offsetX - personalizarDadosArraste.startX;
-        const deltaY = offsetY - personalizarDadosArraste.startY;
-
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          x: personalizarAcessorioSelecionado.x + deltaX,
-          y: personalizarAcessorioSelecionado.y + deltaY
-        };
-
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-
-        setPersonalizarDadosArraste(prev => ({ ...prev, startX: offsetX, startY: offsetY }));
+      switch(resizeCorner) {
+        case "nw":
+          newWidth = touchStateRef.current.initialWidth - (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight - (localY - startLocalY) * 2;
+          break;
+        case "ne":
+          newWidth = touchStateRef.current.initialWidth + (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight - (localY - startLocalY) * 2;
+          break;
+        case "sw":
+          newWidth = touchStateRef.current.initialWidth - (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight + (localY - startLocalY) * 2;
+          break;
+        case "se":
+          newWidth = touchStateRef.current.initialWidth + (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight + (localY - startLocalY) * 2;
+          break;
+        case "n":
+          newHeight = touchStateRef.current.initialHeight - (localY - startLocalY) * 2;
+          break;
+        case "e":
+          newWidth = touchStateRef.current.initialWidth + (localX - startLocalX) * 2;
+          break;
+        case "s":
+          newHeight = touchStateRef.current.initialHeight + (localY - startLocalY) * 2;
+          break;
+        case "w":
+          newWidth = touchStateRef.current.initialWidth - (localX - startLocalX) * 2;
+          break;
+        default:
+          break;
       }
+
+      newWidth = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newWidth));
+      newHeight = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newHeight));
+
+      if (e.touches.length > 1) {
+        const aspect = touchStateRef.current.initialWidth / touchStateRef.current.initialHeight;
+        if (resizeCorner.includes("w") || resizeCorner.includes("e")) {
+          newHeight = newWidth / aspect;
+        } else {
+          newWidth = newHeight * aspect;
+        }
+      }
+
+      const widthRatio = newWidth / selectedAccessory.width;
+      const heightRatio = newHeight / selectedAccessory.height;
+
+      const newX = centerX - (centerX - selectedAccessory.x) * widthRatio;
+      const newY = centerY - (centerY - selectedAccessory.y) * heightRatio;
+
+      const updatedAccessory = {
+        ...selectedAccessory,
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight
+      };
+
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === selectedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
+    } else if (isDragging) {
+      const deltaX = offsetX - touchStateRef.current.startX;
+      const deltaY = offsetY - touchStateRef.current.startY;
+
+      const updatedAccessory = {
+        ...selectedAccessory,
+        x: selectedAccessory.x + deltaX,
+        y: selectedAccessory.y + deltaY
+      };
+
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === selectedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
+      touchStateRef.current.startX = offsetX;
+      touchStateRef.current.startY = offsetY;
     }
   };
 
   const handleCanvasTouchEnd = () => {
-    setPersonalizarArrastando(false);
-    setPersonalizarRedimensionando(null);
-    setPersonalizarRotacionando(false);
+    if (touchStateRef.current.isDragging || touchStateRef.current.isResizing || touchStateRef.current.isRotating) {
+      setTimeout(() => {
+        touchStateRef.current = {
+          ...touchStateRef.current,
+          isDragging: false,
+          isResizing: false,
+          isRotating: false,
+          resizeCorner: null
+        };
+      }, 50);
+    }
   };
 
   const personalizarMouseDownCanvas = (e) => {
@@ -498,65 +491,42 @@ const Personalizar = () => {
     if (clickedAccessory) {
       const control = personalizarDetectarControle(offsetX, offsetY, clickedAccessory);
       setPersonalizarAcessorioSelecionado(clickedAccessory);
+      touchStateRef.current.selectedAccessory = clickedAccessory;
+      touchStateRef.current.startX = offsetX;
+      touchStateRef.current.startY = offsetY;
 
       if (control) {
         if (control.type === 'rotate') {
-          setPersonalizarRotacionando(true);
+          touchStateRef.current.isRotating = true;
           const centerX = clickedAccessory.x + clickedAccessory.width / 2;
           const centerY = clickedAccessory.y + clickedAccessory.height / 2;
-          const initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
-          setPersonalizarDadosArraste({
-            startX: offsetX,
-            startY: offsetY,
-            initialWidth: clickedAccessory.width,
-            initialHeight: clickedAccessory.height,
-            initialAngle: clickedAccessory.angle || 0,
-            initialMouseAngle
-          });
+          touchStateRef.current.initialMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
+          touchStateRef.current.initialAngle = clickedAccessory.angle || 0;
           return;
         } else if (control.type === 'resize') {
-          setPersonalizarRedimensionando(control.corner);
-          setPersonalizarArrastando(true);
-          setPersonalizarDadosArraste({
-            startX: offsetX,
-            startY: offsetY,
-            initialWidth: clickedAccessory.width,
-            initialHeight: clickedAccessory.height,
-            initialAngle: clickedAccessory.angle || 0,
-            initialMouseAngle: 0
-          });
+          touchStateRef.current.isResizing = true;
+          touchStateRef.current.resizeCorner = control.corner;
+          touchStateRef.current.initialWidth = clickedAccessory.width;
+          touchStateRef.current.initialHeight = clickedAccessory.height;
           return;
         } else if (control.type === 'move') {
-          setPersonalizarArrastando(true);
-          setPersonalizarDadosArraste({
-            startX: offsetX,
-            startY: offsetY,
-            initialWidth: clickedAccessory.width,
-            initialHeight: clickedAccessory.height,
-            initialAngle: clickedAccessory.angle || 0,
-            initialMouseAngle: 0
-          });
+          touchStateRef.current.isDragging = true;
           return;
         }
       } else {
-        setPersonalizarArrastando(true);
-        setPersonalizarDadosArraste({
-          startX: offsetX,
-          startY: offsetY,
-          initialWidth: clickedAccessory.width,
-          initialHeight: clickedAccessory.height,
-          initialAngle: clickedAccessory.angle || 0,
-          initialMouseAngle: 0
-        });
+        touchStateRef.current.isDragging = true;
         return;
       }
     }
 
     setPersonalizarAcessorioSelecionado(null);
+    touchStateRef.current.selectedAccessory = null;
   };
 
   const personalizarMouseMoveCanvas = (e) => {
-    if (!personalizarArrastando && !personalizarRotacionando) return;
+    const { isDragging, isResizing, isRotating, selectedAccessory, resizeCorner } = touchStateRef.current;
+    
+    if (!isDragging && !isResizing && !isRotating) return;
     e.preventDefault();
 
     const canvas = personalizarCanvasRef.current;
@@ -564,121 +534,126 @@ const Personalizar = () => {
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
 
-    if (!personalizarAcessorioSelecionado) return;
+    if (!selectedAccessory) return;
 
-    if (personalizarRotacionando) {
-      const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
-      const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
+    if (isRotating) {
+      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
       const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
-      const newAngle = personalizarDadosArraste.initialAngle + (newMouseAngle - personalizarDadosArraste.initialMouseAngle);
+      const newAngle = touchStateRef.current.initialAngle + (newMouseAngle - touchStateRef.current.initialMouseAngle);
       const updatedAccessory = {
-        ...personalizarAcessorioSelecionado,
+        ...selectedAccessory,
         angle: ((newAngle % 360) + 360) % 360
       };
-      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === selectedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
       return;
     }
 
-    if (personalizarArrastando) {
-      if (personalizarRedimensionando) {
-        const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
-        const centerY = personalizarAcessorioSelecionado.y + personalizarAcessorioSelecionado.height / 2;
-        const angle = -(personalizarAcessorioSelecionado.angle || 0) * Math.PI / 180;
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-     
-        const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
-        const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
-        const startLocalX = (personalizarDadosArraste.startX - centerX) * cos - (personalizarDadosArraste.startY - centerY) * sin;
-        const startLocalY = (personalizarDadosArraste.startX - centerX) * sin + (personalizarDadosArraste.startY - centerY) * cos;
+    if (isResizing) {
+      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
+      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
+      const angle = -(selectedAccessory.angle || 0) * Math.PI / 180;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+   
+      const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
+      const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
+      const startLocalX = (touchStateRef.current.startX - centerX) * cos - (touchStateRef.current.startY - centerY) * sin;
+      const startLocalY = (touchStateRef.current.startX - centerX) * sin + (touchStateRef.current.startY - centerY) * cos;
 
-        let newWidth = personalizarDadosArraste.initialWidth;
-        let newHeight = personalizarDadosArraste.initialHeight;
+      let newWidth = touchStateRef.current.initialWidth;
+      let newHeight = touchStateRef.current.initialHeight;
 
-        switch(personalizarRedimensionando) {
-          case "nw":
-            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
-            break;
-          case "ne":
-            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
-            break;
-          case "sw":
-            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
-            break;
-          case "se":
-            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
-            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
-            break;
-          case "n":
-            newHeight = personalizarDadosArraste.initialHeight - (localY - startLocalY) * 2;
-            break;
-          case "e":
-            newWidth = personalizarDadosArraste.initialWidth + (localX - startLocalX) * 2;
-            break;
-          case "s":
-            newHeight = personalizarDadosArraste.initialHeight + (localY - startLocalY) * 2;
-            break;
-          case "w":
-            newWidth = personalizarDadosArraste.initialWidth - (localX - startLocalX) * 2;
-            break;
-          default:
-            break;
-        }
-
-        newWidth = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newWidth));
-        newHeight = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newHeight));
-
-        if (e.shiftKey) {
-          const aspect = personalizarDadosArraste.initialWidth / personalizarDadosArraste.initialHeight;
-          if (personalizarRedimensionando.includes("w") || personalizarRedimensionando.includes("e")) {
-            newHeight = newWidth / aspect;
-          } else {
-            newWidth = newHeight * aspect;
-          }
-        }
-
-        const widthRatio = newWidth / personalizarAcessorioSelecionado.width;
-        const heightRatio = newHeight / personalizarAcessorioSelecionado.height;
-
-        const newX = centerX - (centerX - personalizarAcessorioSelecionado.x) * widthRatio;
-        const newY = centerY - (centerY - personalizarAcessorioSelecionado.y) * heightRatio;
-
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          x: newX,
-          y: newY,
-          width: newWidth,
-          height: newHeight
-        };
-
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-      } else {
-        const deltaX = offsetX - personalizarDadosArraste.startX;
-        const deltaY = offsetY - personalizarDadosArraste.startY;
-
-        const updatedAccessory = {
-          ...personalizarAcessorioSelecionado,
-          x: personalizarAcessorioSelecionado.x + deltaX,
-          y: personalizarAcessorioSelecionado.y + deltaY
-        };
-
-        setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
-        setPersonalizarAcessorioSelecionado(updatedAccessory);
-
-        setPersonalizarDadosArraste(prev => ({ ...prev, startX: offsetX, startY: offsetY }));
+      switch(resizeCorner) {
+        case "nw":
+          newWidth = touchStateRef.current.initialWidth - (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight - (localY - startLocalY) * 2;
+          break;
+        case "ne":
+          newWidth = touchStateRef.current.initialWidth + (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight - (localY - startLocalY) * 2;
+          break;
+        case "sw":
+          newWidth = touchStateRef.current.initialWidth - (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight + (localY - startLocalY) * 2;
+          break;
+        case "se":
+          newWidth = touchStateRef.current.initialWidth + (localX - startLocalX) * 2;
+          newHeight = touchStateRef.current.initialHeight + (localY - startLocalY) * 2;
+          break;
+        case "n":
+          newHeight = touchStateRef.current.initialHeight - (localY - startLocalY) * 2;
+          break;
+        case "e":
+          newWidth = touchStateRef.current.initialWidth + (localX - startLocalX) * 2;
+          break;
+        case "s":
+          newHeight = touchStateRef.current.initialHeight + (localY - startLocalY) * 2;
+          break;
+        case "w":
+          newWidth = touchStateRef.current.initialWidth - (localX - startLocalX) * 2;
+          break;
+        default:
+          break;
       }
+
+      newWidth = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newWidth));
+      newHeight = Math.max(PERSONALIZAR_TAMANHO_MINIMO, Math.min(PERSONALIZAR_TAMANHO_MAXIMO, newHeight));
+
+      if (e.shiftKey) {
+        const aspect = touchStateRef.current.initialWidth / touchStateRef.current.initialHeight;
+        if (resizeCorner.includes("w") || resizeCorner.includes("e")) {
+          newHeight = newWidth / aspect;
+        } else {
+          newWidth = newHeight * aspect;
+        }
+      }
+
+      const widthRatio = newWidth / selectedAccessory.width;
+      const heightRatio = newHeight / selectedAccessory.height;
+
+      const newX = centerX - (centerX - selectedAccessory.x) * widthRatio;
+      const newY = centerY - (centerY - selectedAccessory.y) * heightRatio;
+
+      const updatedAccessory = {
+        ...selectedAccessory,
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight
+      };
+
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === selectedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
+    } else if (isDragging) {
+      const deltaX = offsetX - touchStateRef.current.startX;
+      const deltaY = offsetY - touchStateRef.current.startY;
+
+      const updatedAccessory = {
+        ...selectedAccessory,
+        x: selectedAccessory.x + deltaX,
+        y: selectedAccessory.y + deltaY
+      };
+
+      setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === selectedAccessory.id ? updatedAccessory : acc));
+      setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
+      touchStateRef.current.startX = offsetX;
+      touchStateRef.current.startY = offsetY;
     }
   };
 
   const personalizarMouseUpCanvas = () => {
-    setPersonalizarArrastando(false);
-    setPersonalizarRedimensionando(null);
-    setPersonalizarRotacionando(false);
+    touchStateRef.current = {
+      ...touchStateRef.current,
+      isDragging: false,
+      isResizing: false,
+      isRotating: false,
+      resizeCorner: null
+    };
   };
 
   const personalizarAdicionarAcessorio = (imageSrc, x = null, y = null) => {
@@ -718,6 +693,7 @@ const Personalizar = () => {
     if (personalizarAcessorioSelecionado) {
       setPersonalizarImagensAcessorios(prev => prev.filter(acc => acc.id !== personalizarAcessorioSelecionado.id));
       setPersonalizarAcessorioSelecionado(null);
+      touchStateRef.current.selectedAccessory = null;
     }
   };
 
@@ -757,14 +733,17 @@ const Personalizar = () => {
       const updatedAccessory = { ...personalizarAcessorioSelecionado, angle: ((personalizarAcessorioSelecionado.angle - rotationStep) % 360 + 360) % 360 };
       setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
     } else if (e.key === "ArrowRight") {
       const updatedAccessory = { ...personalizarAcessorioSelecionado, angle: ((personalizarAcessorioSelecionado.angle + rotationStep) % 360 + 360) % 360 };
       setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
     } else if (e.key.toLowerCase() === "r") {
       const updatedAccessory = { ...personalizarAcessorioSelecionado, angle: 0 };
       setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
     } else if (e.key === "ArrowUp") {
       const updatedAccessory = {
         ...personalizarAcessorioSelecionado,
@@ -773,6 +752,7 @@ const Personalizar = () => {
       };
       setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
     } else if (e.key === "ArrowDown") {
       const updatedAccessory = {
         ...personalizarAcessorioSelecionado,
@@ -781,6 +761,7 @@ const Personalizar = () => {
       };
       setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === updatedAccessory.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      touchStateRef.current.selectedAccessory = updatedAccessory;
     }
   };
 
@@ -811,29 +792,6 @@ const Personalizar = () => {
   };
 
   const personalizarArrasteSobre = (e) => e.preventDefault();
-
-  const handleCarouselTouchStart = (e) => {
-    setTouchStartX(e.touches[0].clientX);
-    setIsCarouselSwiping(true);
-  };
-
-  const handleCarouselTouchMove = (e) => {
-    if (!isCarouselSwiping) return;
-    e.preventDefault();
-    const touchX = e.touches[0].clientX;
-    const diff = touchStartX - touchX;
-    if (Math.abs(diff) > 10) {
-      const carousel = personalizarCarouselRef.current;
-      if (carousel) {
-        carousel.scrollLeft += diff * 2;
-        setTouchStartX(touchX);
-      }
-    }
-  };
-
-  const handleCarouselTouchEnd = () => {
-    setIsCarouselSwiping(false);
-  };
 
   const personalizarRolarCarrosselMobile = (direcao) => {
     const carousel = personalizarCarouselRef.current;
@@ -869,7 +827,10 @@ const Personalizar = () => {
               <div
                 key={acessorio.id}
                 className={`personalizar-item-camada ${personalizarAcessorioSelecionado?.id === acessorio.id ? 'personalizar-selecionado' : ''}`}
-                onClick={() => setPersonalizarAcessorioSelecionado(acessorio)}
+                onClick={() => {
+                  setPersonalizarAcessorioSelecionado(acessorio);
+                  touchStateRef.current.selectedAccessory = acessorio;
+                }}
               >
                 <span className="personalizar-nome-camada">Acessório {personalizarImagensAcessorios.length - index}</span>
                 <div className="personalizar-controles-camada">
@@ -917,6 +878,7 @@ const Personalizar = () => {
             onTouchMove={handleCanvasTouchMove}
             onTouchEnd={handleCanvasTouchEnd}
             onTouchCancel={handleCanvasTouchEnd}
+            style={{ touchAction: 'none' }}
           ></canvas>
           <button className="personalizar-botao-deletar" onClick={personalizarRemoverAcessorio} title="Deletar Objeto">
             <FaTrash />
@@ -952,9 +914,7 @@ const Personalizar = () => {
               className="personalizar-carrossel"
               id="personalizar-carrossel"
               ref={personalizarCarouselRef}
-              onTouchStart={handleCarouselTouchStart}
-              onTouchMove={handleCarouselTouchMove}
-              onTouchEnd={handleCarouselTouchEnd}
+              style={{ touchAction: 'pan-y' }}
             >
               {personalizarItens[personalizarAbaAtual].map((imageSrc, index) => (
                 <div
