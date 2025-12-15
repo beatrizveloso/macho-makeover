@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaArrowLeft, FaTrash, FaArrowRight, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import './Personalizar.css';
 
-const PERSONALIZAR_TAMANHO_ALCA = 12;
-const PERSONALIZAR_DISTANCIA_ALCA_ROTACAO = 35;
+const PERSONALIZAR_TAMANHO_ALCA = 15;
+const PERSONALIZAR_DISTANCIA_ALCA_ROTACAO = 40;
 const PERSONALIZAR_TAMANHO_MINIMO = 30;
 const PERSONALIZAR_TAMANHO_MAXIMO = 800;
 
@@ -50,6 +50,7 @@ const Personalizar = () => {
   });
   const [touchStartX, setTouchStartX] = useState(0);
   const [isCarouselSwiping, setIsCarouselSwiping] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const personagemSelecionado = localStorage.getItem('carrosselPersonagemSelecionado');
@@ -66,6 +67,14 @@ const Personalizar = () => {
   useEffect(() => {
     personalizarDesenharPersonagemEAcessorios();
   }, [personalizarImagemPersonagem, personalizarImagensAcessorios, personalizarAcessorioSelecionado]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const personalizarDesenharPersonagemEAcessorios = () => {
     const canvas = personalizarCanvasRef.current;
@@ -101,7 +110,7 @@ const Personalizar = () => {
 
       if (personalizarAcessorioSelecionado && personalizarAcessorioSelecionado.id === acessorio.id) {
         ctx.strokeStyle = "rgba(148, 1, 104, 0.9)";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.strokeRect(-width / 2, -height / 2, width, height);
 
         ctx.fillStyle = "rgba(143, 28, 85, 0.9)";
@@ -140,7 +149,7 @@ const Personalizar = () => {
           ctx.fill();
 
           ctx.fillStyle = "rgba(0,0,0,0.9)";
-          ctx.font = "12px Arial";
+          ctx.font = "14px Arial";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText("↻", rh.x, rh.y);
@@ -186,7 +195,7 @@ const Personalizar = () => {
       for (const c of cornerPositions) {
         const dx = local.x - c.x;
         const dy = local.y - c.y;
-        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA) {
+        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA * 1.5) {
           return acc;
         }
       }
@@ -200,7 +209,7 @@ const Personalizar = () => {
       for (const e of edgePositions) {
         const dx = local.x - e.x;
         const dy = local.y - e.y;
-        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA * 0.9) {
+        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA * 1.2) {
           return acc;
         }
       }
@@ -209,7 +218,7 @@ const Personalizar = () => {
         const rh = calcRotHandle(hw, hh, c.x, c.y, PERSONALIZAR_DISTANCIA_ALCA_ROTACAO);
         const dx = local.x - rh.x;
         const dy = local.y - rh.y;
-        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA) {
+        if (Math.sqrt(dx*dx + dy*dy) <= PERSONALIZAR_TAMANHO_ALCA * 1.5) {
           return acc;
         }
       }
@@ -281,6 +290,7 @@ const Personalizar = () => {
     const offsetY = touch.clientY - rect.top;
 
     const clickedAccessory = personalizarObterAcessorioNaPosicao(offsetX, offsetY);
+    
     if (clickedAccessory) {
       const control = personalizarDetectarControle(offsetX, offsetY, clickedAccessory);
       setPersonalizarAcessorioSelecionado(clickedAccessory);
@@ -336,22 +346,30 @@ const Personalizar = () => {
         });
         return;
       }
+    } else {
+      setPersonalizarAcessorioSelecionado(null);
     }
 
-    setPersonalizarAcessorioSelecionado(null);
+    setPersonalizarDadosArraste({
+      startX: offsetX,
+      startY: offsetY,
+      initialWidth: 0,
+      initialHeight: 0,
+      initialAngle: 0,
+      initialMouseAngle: 0
+    });
   };
 
   const handleCanvasTouchMove = (e) => {
-    if (!personalizarArrastando && !personalizarRotacionando) return;
     e.preventDefault();
+    
+    if (!personalizarAcessorioSelecionado) return;
 
     const canvas = personalizarCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
     const offsetX = touch.clientX - rect.left;
     const offsetY = touch.clientY - rect.top;
-
-    if (!personalizarAcessorioSelecionado) return;
 
     if (personalizarRotacionando) {
       const centerX = personalizarAcessorioSelecionado.x + personalizarAcessorioSelecionado.width / 2;
@@ -364,6 +382,7 @@ const Personalizar = () => {
       };
       setPersonalizarImagensAcessorios(prev => prev.map(acc => acc.id === personalizarAcessorioSelecionado.id ? updatedAccessory : acc));
       setPersonalizarAcessorioSelecionado(updatedAccessory);
+      setPersonalizarDadosArraste(prev => ({ ...prev, startX: offsetX, startY: offsetY }));
       return;
     }
 
@@ -463,11 +482,9 @@ const Personalizar = () => {
   };
 
   const handleCanvasTouchEnd = () => {
-    setTimeout(() => {
-      setPersonalizarArrastando(false);
-      setPersonalizarRedimensionando(null);
-      setPersonalizarRotacionando(false);
-    }, 50);
+    setPersonalizarArrastando(false);
+    setPersonalizarRedimensionando(null);
+    setPersonalizarRotacionando(false);
   };
 
   const personalizarMouseDownCanvas = (e) => {
@@ -824,8 +841,6 @@ const Personalizar = () => {
       carousel.scrollBy({ left: direcao * carousel.clientWidth * 0.8, behavior: 'smooth' });
     }
   };
-
-  const isMobile = window.innerWidth <= 768;
 
   return (
     <div className="personalizar-container" onDragOver={personalizarArrasteSobre}>
