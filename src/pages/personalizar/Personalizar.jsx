@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaArrowLeft, FaTrash, FaArrowRight } from 'react-icons/fa';
+import { FaArrowLeft, FaTrash, FaArrowRight, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import './Personalizar.css';
 
 const PERSONALIZAR_TAMANHO_ALCA = 12;
@@ -17,7 +17,7 @@ const personalizarItens = {
   chapeus: Array.from({ length: 50 }, (_, i) => `/images/chapeus/chapeu${i + 1}.png`),
   adds: [
     ...Array.from({ length: 36 }, (_, i) => `/images/adds/add${i + 1}.png`),
-    ...Array.from({ length: 12 }, (_, i) => `/images/adds/bolsa${i + 1}.png`)
+    ...Array.from({ length: 14 }, (_, i) => `/images/adds/bolsa${i + 1}.png`)
   ]
 };
 
@@ -704,6 +704,30 @@ const Personalizar = () => {
     }
   };
 
+  const personalizarMoverCamadaParaCima = (acessorioId) => {
+    setPersonalizarImagensAcessorios(prev => {
+      const index = prev.findIndex(acc => acc.id === acessorioId);
+      if (index < prev.length - 1) {
+        const newArray = [...prev];
+        [newArray[index], newArray[index + 1]] = [newArray[index + 1], newArray[index]];
+        return newArray;
+      }
+      return prev;
+    });
+  };
+
+  const personalizarMoverCamadaParaBaixo = (acessorioId) => {
+    setPersonalizarImagensAcessorios(prev => {
+      const index = prev.findIndex(acc => acc.id === acessorioId);
+      if (index > 0) {
+        const newArray = [...prev];
+        [newArray[index], newArray[index - 1]] = [newArray[index - 1], newArray[index]];
+        return newArray;
+      }
+      return prev;
+    });
+  };
+
   const personalizarTeclaPressionada = (e) => {
     if (e.key === "Delete" && personalizarAcessorioSelecionado) {
       personalizarRemoverAcessorio();
@@ -832,7 +856,29 @@ const Personalizar = () => {
                 className={`personalizar-item-camada ${personalizarAcessorioSelecionado?.id === acessorio.id ? 'personalizar-selecionado' : ''}`}
                 onClick={() => setPersonalizarAcessorioSelecionado(acessorio)}
               >
-                Acessório {personalizarImagensAcessorios.length - index}
+                <span className="personalizar-nome-camada">Acessório {personalizarImagensAcessorios.length - index}</span>
+                <div className="personalizar-controles-camada">
+                  <button 
+                    className="personalizar-botao-mover-cima"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      personalizarMoverCamadaParaCima(acessorio.id);
+                    }}
+                    title="Mover para cima"
+                  >
+                    <FaArrowUp size={12} />
+                  </button>
+                  <button 
+                    className="personalizar-botao-mover-baixo"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      personalizarMoverCamadaParaBaixo(acessorio.id);
+                    }}
+                    title="Mover para baixo"
+                  >
+                    <FaArrowDown size={12} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

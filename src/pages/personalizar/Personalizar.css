@@ -308,7 +308,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   border: 2px solid #940168;
   transition: all 0.3s ease;
-  width: 200px;
+  width: 250px;
 }
 
 .personalizar-painel-camadas.personalizar-recolhido {
@@ -367,6 +367,7 @@
   cursor: pointer;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 14px;
   transition: all 0.2s;
 }
@@ -382,19 +383,39 @@
   font-weight: bold;
 }
 
+.personalizar-nome-camada {
+  flex: 1;
+}
+
+.personalizar-controles-camada {
+  display: flex;
+  gap: 5px;
+}
+
 .personalizar-controles-camada button {
-  margin-left: 5px;
+  margin: 0;
   font-size: 12px;
   background: #d64499;
   color: white;
   border: none;
   border-radius: 3px;
   cursor: pointer;
-  padding: 2px 5px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .personalizar-controles-camada button:hover {
   background: #940168;
+  transform: scale(1.1);
+}
+
+.personalizar-botao-mover-cima,
+.personalizar-botao-mover-baixo {
+  width: 24px;
+  height: 24px;
 }
 
 .personalizar-canva canvas {
@@ -544,6 +565,7 @@
     width: 90%;
     margin: 10px auto;
     margin-top: 20px;
+    width: 280px;
   }
   
   .personalizar-gifs {
@@ -648,6 +670,10 @@
     width: 40px;
     height: 40px;
     font-size: 18px;
+  }
+  
+  .personalizar-painel-camadas {
+    width: 260px;
   }
 }
 
