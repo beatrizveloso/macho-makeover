@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
 import './Carrossel.css';
 
 const carrosselCategorias = {
@@ -130,12 +129,14 @@ const Carrossel = () => {
   const [carrosselAnguloAtual, setCarrosselAnguloAtual] = useState(0);
   const [carrosselPersonagemSelecionado, setCarrosselPersonagemSelecionado] = useState(null);
   const [carrosselMostrarAlerta, setCarrosselMostrarAlerta] = useState(false);
+  const [carrosselIndiceCentral, setCarrosselIndiceCentral] = useState(0);
 
   const carrosselExibirCarrossel = (categoria) => {
     setCarrosselCategoriaAtual(categoria);
     setCarrosselPaginaAtual('carrossel');
     setCarrosselPersonagemSelecionado(null);
     setCarrosselAnguloAtual(0);
+    setCarrosselIndiceCentral(0);
   };
 
   const carrosselVoltarCategorias = () => {
@@ -146,8 +147,15 @@ const Carrossel = () => {
   const carrosselRotacionarCarrossel = (direcao) => {
     if (!carrosselCategoriaAtual) return;
     const itens = carrosselCategorias[carrosselCategoriaAtual].itens;
-    const anguloItem = itens.length > 0 ? 360 / itens.length : 0;
-    setCarrosselAnguloAtual(prev => prev + direcao * anguloItem);
+    const quantidadeItens = itens.length;
+    const anguloItem = quantidadeItens > 0 ? 360 / quantidadeItens : 0;
+    
+    setCarrosselIndiceCentral(prev => {
+      const novoIndice = (prev + direcao + quantidadeItens) % quantidadeItens;
+      return novoIndice;
+    });
+    
+    setCarrosselAnguloAtual(prev => prev - direcao * anguloItem);
   };
 
   const carrosselConfirmarSelecao = () => {
@@ -167,18 +175,55 @@ const Carrossel = () => {
     setCarrosselPersonagemSelecionado(src);
   };
 
+  const calcularIntensidadeBlur = (index) => {
+    if (!carrosselCategoriaAtual) return 5;
+    
+    const itens = carrosselCategorias[carrosselCategoriaAtual].itens;
+    const totalItens = itens.length;
+    if (totalItens === 0) return 5;
+    
+    if (index === carrosselIndiceCentral) {
+      return 0;
+    }
+    
+    const diferenca = Math.min(
+      Math.abs(index - carrosselIndiceCentral),
+      Math.abs(index - carrosselIndiceCentral + totalItens),
+      Math.abs(index - carrosselIndiceCentral - totalItens)
+    );
+    
+    return Math.min(8, 2 + diferenca * 1.5);
+  };
+
   useEffect(() => {
     if (carrosselCategoriaAtual) {
-      const itens = document.querySelectorAll('.carrossel-item');
+      const itens = carrosselCategorias[carrosselCategoriaAtual].itens;
       const quantidadeItens = itens.length;
       const anguloItem = quantidadeItens > 0 ? 360 / quantidadeItens : 0;
       
-      itens.forEach((item, index) => {
+      const itensDOM = document.querySelectorAll('.carrossel-item');
+      itensDOM.forEach((item, index) => {
         const angulo = index * anguloItem;
         item.style.transform = `rotateY(${angulo}deg) translateZ(300px)`;
+        
+        const blurIntensidade = calcularIntensidadeBlur(index);
+        const img = item.querySelector('img');
+        if (img) {
+          img.style.filter = `blur(${blurIntensidade}px)`;
+          img.style.transition = 'filter 0.5s ease';
+        }
       });
     }
-  }, [carrosselCategoriaAtual]);
+  }, [carrosselCategoriaAtual, carrosselAnguloAtual, carrosselIndiceCentral]);
+
+  useEffect(() => {
+    if (carrosselCategoriaAtual && carrosselIndiceCentral !== null) {
+      const itens = carrosselCategorias[carrosselCategoriaAtual].itens;
+      if (itens && itens[carrosselIndiceCentral]) {
+        setCarrosselPersonagemSelecionado(itens[carrosselIndiceCentral].src);
+      }
+    }
+  }, [carrosselCategoriaAtual, carrosselIndiceCentral]);
 
   return (
     <div className="carrossel-container">
@@ -244,8 +289,8 @@ const Carrossel = () => {
               ))}
             </div>
             <div className="carrossel-controles">
-              <button className="carrossel-botao-navegacao" onClick={() => carrosselRotacionarCarrossel(1)}>&#8249;</button>
-              <button className="carrossel-botao-navegacao" onClick={() => carrosselRotacionarCarrossel(-1)}>&#8250;</button>
+              <button className="carrossel-botao-navegacao" onClick={() => carrosselRotacionarCarrossel(-1)}>&#8249;</button>
+              <button className="carrossel-botao-navegacao" onClick={() => carrosselRotacionarCarrossel(1)}>&#8250;</button>
             </div>
           </div>
 

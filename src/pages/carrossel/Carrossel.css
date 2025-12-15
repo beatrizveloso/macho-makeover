@@ -208,7 +208,7 @@
   width: auto;
   height: 90%;
   transform-origin: center;
-  transition: transform 0.5s;
+  transition: transform 0.5s, filter 0.5s ease;
 }
 
 .carrossel-item img {
@@ -217,6 +217,7 @@
   object-fit: contain;
   cursor: pointer;
   border-radius: 10px;
+  transition: filter 0.5s ease, border 0.3s ease;
 }
 
 .carrossel-selecionado {
@@ -413,8 +414,8 @@
 
 @media (max-width: 480px) {
   .personalizar-botao-voltar {
-    width: 140px; 
-    height: 50px; 
+    width: 140px;
+    height: 50px;
     top: 15px;
     left: 15px;
   }
@@ -466,13 +467,13 @@
     margin-top: 20px;
     max-width: 65%;
     gap: 10px;
-    width: 100%; 
+    width: 100%;
   }
 
   .carrossel-botao-categoria {
     width: 100%;
-    max-width: none; 
-    height: 70px; 
+    max-width: none;
+    height: 70px;
     font-size: 14px;
     background-size: 95% !important;
   }
@@ -501,12 +502,12 @@
   }
 
   .carrossel-item {
-    height: 90%; 
+    height: 90%;
   }
 
   .carrossel-item img {
     width: auto;
-    max-width: 180px; 
+    max-width: 180px;
     height: 100%;
   }
 
@@ -562,16 +563,16 @@
   }
 
   .carrossel-carrossel {
-    height: 260px; 
+    height: 260px;
   }
 
   .carrossel-item img {
-    max-width: 200px; 
+    max-width: 200px;
   }
 
   .carrossel-botao-categoria {
-    height: 65px; 
-    max-width: none; 
+    height: 65px;
+    max-width: none;
     width: 100%;
   }
 
