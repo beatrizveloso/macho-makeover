@@ -43,13 +43,13 @@ const Personalizar = () => {
   const [personalizarAbaAtual, setPersonalizarAbaAtual] = useState('cabelos');
   const [personalizarPainelRecolhido, setPersonalizarPainelRecolhido] = useState(false);
   const [personalizarArrastando, setPersonalizarArrastando] = useState(false);
-  const [personalizarArrastandoItem, setPersonalizarArrastandoItem] = useState(false);
   const [personalizarRedimensionando, setPersonalizarRedimensionando] = useState(null);
   const [personalizarRotacionando, setPersonalizarRotacionando] = useState(false);
-  const [personalizarTocando, setPersonalizarTocando] = useState(false);
   const [personalizarDadosArraste, setPersonalizarDadosArraste] = useState({
     startX: 0, startY: 0, initialWidth: 0, initialHeight: 0, initialAngle: 0, initialMouseAngle: 0
   });
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [isCarouselSwiping, setIsCarouselSwiping] = useState(false);
 
   useEffect(() => {
     const personagemSelecionado = localStorage.getItem('carrosselPersonagemSelecionado');
@@ -272,7 +272,7 @@ const Personalizar = () => {
     return null;
   };
 
-  const personalizarTouchStartCanvas = (e) => {
+  const handleCanvasTouchStart = (e) => {
     e.preventDefault();
     const canvas = personalizarCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -284,7 +284,6 @@ const Personalizar = () => {
     if (clickedAccessory) {
       const control = personalizarDetectarControle(offsetX, offsetY, clickedAccessory);
       setPersonalizarAcessorioSelecionado(clickedAccessory);
-      setPersonalizarTocando(true);
 
       if (control) {
         if (control.type === 'rotate') {
@@ -342,8 +341,8 @@ const Personalizar = () => {
     setPersonalizarAcessorioSelecionado(null);
   };
 
-  const personalizarTouchMoveCanvas = (e) => {
-    if (!personalizarArrastando && !personalizarRotacionando && !personalizarTocando) return;
+  const handleCanvasTouchMove = (e) => {
+    if (!personalizarArrastando && !personalizarRotacionando) return;
     e.preventDefault();
 
     const canvas = personalizarCanvasRef.current;
@@ -463,11 +462,12 @@ const Personalizar = () => {
     }
   };
 
-  const personalizarTouchEndCanvas = () => {
-    setPersonalizarArrastando(false);
-    setPersonalizarRedimensionando(null);
-    setPersonalizarRotacionando(false);
-    setPersonalizarTocando(false);
+  const handleCanvasTouchEnd = () => {
+    setTimeout(() => {
+      setPersonalizarArrastando(false);
+      setPersonalizarRedimensionando(null);
+      setPersonalizarRotacionando(false);
+    }, 50);
   };
 
   const personalizarMouseDownCanvas = (e) => {
@@ -750,12 +750,10 @@ const Personalizar = () => {
 
   const personalizarInicioArraste = (e, imageSrc) => {
     e.dataTransfer.setData('text/plain', imageSrc);
-    setPersonalizarArrastandoItem(true);
     e.currentTarget.classList.add('personalizar-arrastando');
   };
 
   const personalizarFimArraste = (e) => {
-    setPersonalizarArrastandoItem(false);
     e.currentTarget.classList.remove('personalizar-arrastando');
   };
 
@@ -773,21 +771,27 @@ const Personalizar = () => {
 
   const personalizarArrasteSobre = (e) => e.preventDefault();
 
-  const personalizarRolagemCarrossel = () => {
-    const carousel = personalizarCarouselRef.current;
-    const prevArrow = document.getElementById('personalizar-seta-anterior');
-    const nextArrow = document.getElementById('personalizar-seta-proxima');
-    if (prevArrow && nextArrow && carousel) {
-      prevArrow.style.visibility = carousel.scrollTop > 0 ? 'visible' : 'hidden';
-      nextArrow.style.visibility = carousel.scrollTop < carousel.scrollHeight - carousel.clientHeight ? 'visible' : 'hidden';
+  const handleCarouselTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+    setIsCarouselSwiping(true);
+  };
+
+  const handleCarouselTouchMove = (e) => {
+    if (!isCarouselSwiping) return;
+    e.preventDefault();
+    const touchX = e.touches[0].clientX;
+    const diff = touchStartX - touchX;
+    if (Math.abs(diff) > 10) {
+      const carousel = personalizarCarouselRef.current;
+      if (carousel) {
+        carousel.scrollLeft += diff * 2;
+        setTouchStartX(touchX);
+      }
     }
   };
 
-  const personalizarRolarCarrossel = (direcao) => {
-    const carousel = personalizarCarouselRef.current;
-    if (carousel) {
-      carousel.scrollBy({ top: direcao * carousel.clientHeight, behavior: 'smooth' });
-    }
+  const handleCarouselTouchEnd = () => {
+    setIsCarouselSwiping(false);
   };
 
   const personalizarRolarCarrosselMobile = (direcao) => {
@@ -795,10 +799,6 @@ const Personalizar = () => {
     if (carousel) {
       carousel.scrollBy({ left: direcao * carousel.clientWidth * 0.8, behavior: 'smooth' });
     }
-  };
-
-  const personalizarVoltar = () => {
-    window.history.back();
   };
 
   const isMobile = window.innerWidth <= 768;
@@ -852,10 +852,10 @@ const Personalizar = () => {
             onMouseLeave={personalizarMouseUpCanvas}
             onDrop={personalizarSoltarNoCanvas}
             onDragOver={personalizarArrasteSobre}
-            onTouchStart={personalizarTouchStartCanvas}
-            onTouchMove={personalizarTouchMoveCanvas}
-            onTouchEnd={personalizarTouchEndCanvas}
-            onTouchCancel={personalizarTouchEndCanvas}
+            onTouchStart={handleCanvasTouchStart}
+            onTouchMove={handleCanvasTouchMove}
+            onTouchEnd={handleCanvasTouchEnd}
+            onTouchCancel={handleCanvasTouchEnd}
           ></canvas>
           <button className="personalizar-botao-deletar" onClick={personalizarRemoverAcessorio} title="Deletar Objeto">
             <FaTrash />
@@ -879,36 +879,91 @@ const Personalizar = () => {
             <div className={`personalizar-aba ${personalizarAbaAtual === 'chapeus' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('chapeus')}>Chapeus</div>
             <div className={`personalizar-aba ${personalizarAbaAtual === 'adds' ? 'personalizar-aba-ativa' : ''}`} onClick={() => personalizarClicarAba('adds')}>Adds</div>
           </div>
-          {isMobile && <FaArrowRight className="personalizar-seta-deslizar" />}
         </div>
 
-        <div className="personalizar-seta" id="personalizar-seta-anterior" onClick={isMobile ? () => personalizarRolarCarrosselMobile(-1) : () => personalizarRolarCarrossel(-1)}>
-          {isMobile ? '←' : '↑'}
-        </div>
-
-        <div
-          className="personalizar-carrossel"
-          id="personalizar-carrossel"
-          ref={personalizarCarouselRef}
-          onScroll={personalizarRolagemCarrossel}
-        >
-          {personalizarItens[personalizarAbaAtual].map((imageSrc, index) => (
-            <div
-              key={index}
-              className="personalizar-item-carrossel"
-              draggable="true"
-              onDragStart={(e) => personalizarInicioArraste(e, imageSrc)}
-              onDragEnd={personalizarFimArraste}
-              onClick={() => personalizarAdicionarAcessorio(imageSrc)}
-            >
-              <img src={imageSrc} alt="Acessório" draggable="false" className="personalizar-imagem-acessorio" />
+        {isMobile && (
+          <>
+            <div className="personalizar-seta personalizar-seta-anterior" onClick={() => personalizarRolarCarrosselMobile(-1)}>
+              <FaArrowLeft />
             </div>
-          ))}
-        </div>
 
-        <div className="personalizar-seta" id="personalizar-seta-proxima" onClick={isMobile ? () => personalizarRolarCarrosselMobile(1) : () => personalizarRolarCarrossel(1)}>
-          {isMobile ? '→' : '↓'}
-        </div>
+            <div
+              className="personalizar-carrossel"
+              id="personalizar-carrossel"
+              ref={personalizarCarouselRef}
+              onTouchStart={handleCarouselTouchStart}
+              onTouchMove={handleCarouselTouchMove}
+              onTouchEnd={handleCarouselTouchEnd}
+            >
+              {personalizarItens[personalizarAbaAtual].map((imageSrc, index) => (
+                <div
+                  key={index}
+                  className="personalizar-item-carrossel"
+                  draggable="true"
+                  onDragStart={(e) => personalizarInicioArraste(e, imageSrc)}
+                  onDragEnd={personalizarFimArraste}
+                  onClick={() => personalizarAdicionarAcessorio(imageSrc)}
+                >
+                  <img src={imageSrc} alt="Acessório" draggable="false" className="personalizar-imagem-acessorio" />
+                </div>
+              ))}
+            </div>
+
+            <div className="personalizar-seta personalizar-seta-proxima" onClick={() => personalizarRolarCarrosselMobile(1)}>
+              <FaArrowRight />
+            </div>
+          </>
+        )}
+
+        {!isMobile && (
+          <>
+            <div className="personalizar-seta personalizar-seta-anterior" onClick={() => {
+              const carousel = personalizarCarouselRef.current;
+              if (carousel) {
+                carousel.scrollBy({ top: -carousel.clientHeight, behavior: 'smooth' });
+              }
+            }}>
+              ↑
+            </div>
+
+            <div
+              className="personalizar-carrossel"
+              id="personalizar-carrossel"
+              ref={personalizarCarouselRef}
+              onScroll={() => {
+                const carousel = personalizarCarouselRef.current;
+                const prevArrow = document.querySelector('.personalizar-seta-anterior');
+                const nextArrow = document.querySelector('.personalizar-seta-proxima');
+                if (prevArrow && nextArrow && carousel) {
+                  prevArrow.style.visibility = carousel.scrollTop > 0 ? 'visible' : 'hidden';
+                  nextArrow.style.visibility = carousel.scrollTop < carousel.scrollHeight - carousel.clientHeight ? 'visible' : 'hidden';
+                }
+              }}
+            >
+              {personalizarItens[personalizarAbaAtual].map((imageSrc, index) => (
+                <div
+                  key={index}
+                  className="personalizar-item-carrossel"
+                  draggable="true"
+                  onDragStart={(e) => personalizarInicioArraste(e, imageSrc)}
+                  onDragEnd={personalizarFimArraste}
+                  onClick={() => personalizarAdicionarAcessorio(imageSrc)}
+                >
+                  <img src={imageSrc} alt="Acessório" draggable="false" className="personalizar-imagem-acessorio" />
+                </div>
+              ))}
+            </div>
+
+            <div className="personalizar-seta personalizar-seta-proxima" onClick={() => {
+              const carousel = personalizarCarouselRef.current;
+              if (carousel) {
+                carousel.scrollBy({ top: carousel.clientHeight, behavior: 'smooth' });
+              }
+            }}>
+              ↓
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
